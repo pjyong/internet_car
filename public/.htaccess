@@ -4,8 +4,3 @@
 # absolute physical path to the directory that contains this htaccess file.
 #
 # RewriteBase /
-
-if( !-e $request_filename )
-{
-rewrite ^ index.php last
-}

@@ -26,5 +26,8 @@ require __DIR__ . '/../src/middleware.php';
 // Register routes
 require __DIR__ . '/../src/routes.php';
 
+// 所有业务逻辑
+require __DIR__ . '/../src/bussiness.php';
+
 // Run app
 $app->run();
