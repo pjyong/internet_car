@@ -1,5 +1,7 @@
 <?php
 // DIC configuration
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\DriverManager;
 
 $container = $app->getContainer();
 
@@ -16,4 +18,11 @@ $container['logger'] = function ($c) {
     $logger->pushProcessor(new Monolog\Processor\UidProcessor());
     $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
     return $logger;
+};
+
+// 将DB注入进来
+$container['db'] = function ($c) {
+    $settings = $c->get('settings')['db'];
+    $config = new Configuration();
+    return DriverManager::getConnection( $settings, $config );
 };

@@ -15,5 +15,13 @@ return [
             'path' => __DIR__ . '/../logs/app.log',
             'level' => \Monolog\Logger::DEBUG,
         ],
+        'db'=>array(
+			'host' => '192.168.31.234',
+			'user' => 'root',
+			'password' => 'cheyoo',
+			'driver' => 'pdo_mysql',
+			'port' => 3307,
+			'dbname' => 'yu',
+		),
     ],
 ];
