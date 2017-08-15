@@ -1,62 +1,73 @@
-<!DOCTYPE html>
-<html lang="zh-cmn-Hans">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-    <title>WeUI</title>
-    <link rel="stylesheet" href="/style/weui.css"/>
-    <link rel="stylesheet" href="/dist/example.css"/>
-</head>
-<body ontouchstart>
-    <div class="page badge js_show">
-        <div class="page__hd">
-            <h1 class="page__title">Badge</h1>
-            <p class="page__desc">徽章</p>
-        </div>
-
-        <div class="page__bd">
-            <div class="weui-cells">
-                <div class="weui-cell">
-                    <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
-                        <img src="images/pic_160.png" style="width: 50px;display: block">
-                    </div>
-                    <div class="weui-cell__bd">
-                        <p><?php echo $staffInfo['name']; ?></p>
-                        <p style="font-size: 13px;color: #888888;"><?php echo $staffInfo['department_name']; ?></p>
-                    </div>
-                </div>
-                <div class="weui-cell">
-                    <div class="weui-cell__bd">
-                        <span style="vertical-align: middle">房间号</span>
-                        <span class="weui-badge" style="margin-left: 5px;"><?php echo $staffInfo['department_name']; ?></span>
-                    </div>
-                    <div class="weui-cell__ft"></div>
-                </div>
-                <div class="weui-cell weui-cell_access">
-                    <div class="weui-cell__bd">
-                        <span style="vertical-align: middle">单行列表</span>
-                        <span class="weui-badge" style="margin-left: 5px;">8</span>
-                    </div>
-                    <div class="weui-cell__ft">详细信息</div>
-                </div>
-                <div class="weui-cell weui-cell_access">
-                    <div class="weui-cell__bd">
-                        <span style="vertical-align: middle">单行列表</span>
-                        <span class="weui-badge" style="margin-left: 5px;">New</span>
-                    </div>
-                    <div class="weui-cell__ft"></div>
-                </div>
+<?php require_once( TEMPLATE_PATH . './header.phtml' ); ?>
+<div class="page__bd">
+    <div class="weui-cells">
+        <div class="weui-cell">
+            <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                <img src="images/pic_160.png" style="width: 50px;display: block">
+                <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
+                    <?php if($staffInfo['status'] == 1){
+                        echo '待审核';
+                    } else if($staffInfo['status'] == 2){
+                        echo '已审核';
+                    }
+                    ?>
+                </span>
+            </div>
+            <div class="weui-cell__bd">
+                <p><?php echo $staffInfo['name']; ?></p>
+                <p style="font-size: 13px;color: #888888;"><?php echo $staffInfo['department_name']; ?></p>
             </div>
         </div>
-
-        <div class="page__ft j_bottom">
-            <span>发达是否咖啡卡夫卡</span>
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <span style="vertical-align: middle">手机号</span>
+            </div>
+            <div class="weui-cell__ft"><?php echo $staffInfo['phone']; ?></div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <span style="vertical-align: middle">房间号</span>
+            </div>
+            <div class="weui-cell__ft"><?php echo $staffInfo['room']; ?></div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <span style="vertical-align: middle">加入时间</span>
+            </div>
+            <div class="weui-cell__ft"><?php echo $staffInfo['create_time']; ?></div>
         </div>
     </div>
-
-
-    <script src="/dist/zepto.min.js"></script>
-    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
-    <script src="https://res.wx.qq.com/open/libs/weuijs/1.0.0/weui.min.js"></script>
-</body>
-</html>
+    <?php if($showActions){ ?>
+    <div class="weui-cells weui-cells_form">
+        <div class="weui-cell weui-cell_select weui-cell_select-after">
+            <div class="weui-cell__hd">
+                <label for="" class="weui-label">选择部门</label>
+            </div>
+            <div class="weui-cell__bd">
+                <select class="weui-select" name="select2">
+                    <?php foreach($allDepartments as $id => $depa){ ?>
+                        <option value="<?php echo $id;?>"><?php echo $depa;?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_switch">
+            <div class="weui-cell__bd">审核状态</div>
+            <div class="weui-cell__ft">
+                <label for="switch_status" class="weui-switch-cp">
+                    <input id="switch_status" class="weui-switch-cp__input" type="checkbox" checked="checked">
+                    <div class="weui-switch-cp__box"></div>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="weui-btn-area">
+        <a class="weui-btn weui-btn_primary" href="javascript:" id="saveStaffInfo">保存</a>
+    </div>
+    <?php } ?>
+</div>
+<?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
+<script>
+$(document).ready(function(){
+});
+</script>

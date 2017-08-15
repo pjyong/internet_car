@@ -26,3 +26,10 @@ $container['db'] = function ($c) {
     $config = new Configuration();
     return DriverManager::getConnection( $settings, $config );
 };
+
+// 404
+$container['notFoundHandler'] = function ($c) {
+    return function ($request, $response) use ($c) {
+        return $c['renderer']->render($response, 'error.phtml');
+    };
+};
