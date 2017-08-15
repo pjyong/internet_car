@@ -31,6 +31,7 @@ function getStaffListByStatus( $status )
 // 保存用户资料
 function saveStaffInfo( $info, $staffID )
 {
+    global $db;
     $db->update( 'staff', $info, array('id'=>$staffID) );
 }
 

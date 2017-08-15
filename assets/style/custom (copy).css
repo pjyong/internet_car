@@ -1,0 +1,727 @@
+@charset "UTF-8";
+/*覆盖weui的默认toast样式*/
+/*边框颜色#E6E6E6*/
+.weui_icon_toast {
+  display: none; }
+
+.weui_toast {
+  min-height: 30px;
+  /*padding:15px;*/ }
+
+.weui_cells_access .weui_cell_ft:after, .weui-border-b {
+  border-color: #E6E6E6; }
+
+.weui_toast_content {
+  padding: 15px;
+  margin: 0px; }
+
+.weui_loading_toast .weui_toast_content {
+  padding: 0px;
+  margin-bottom: 15px; }
+
+.c_weui_badge {
+  border: 1px solid #F9665A;
+  color: #F9665A;
+  background-color: white;
+  border-radius: 5px; }
+
+.weui_btn_area {
+  margin: 15px; }
+
+.weui_cells {
+  margin-top: 10px; }
+
+.weui-comment {
+  font-size: 14px; }
+
+.c_comment_context {
+  font-size: 12px; }
+
+.c_text_overflow {
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap; }
+
+.c_comment_context .weui-flex-item {
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap; }
+
+.weui_cells_checkbox .weui_cell:active {
+  background-color: inherit; }
+
+.weui_cells_checkbox .weui_icon_checked:before {
+  font-size: 18px; }
+
+.weui_cells {
+  font-size: 13px; }
+
+a:active {
+  color: inherit; }
+
+.weui_media_box.weui_media_appmsg .weui_media_appmsg_thumb {
+  border-radius: 5px; }
+
+.weui-popup__overlay,
+.weui-popup__container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10; }
+
+.weui-popup__overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity .3s; }
+
+.weui-popup__container {
+  display: none; }
+
+.weui-popup__container.weui-popup__container--visible {
+  display: block; }
+
+.weui-popup__container .weui-cells {
+  margin: 0;
+  text-align: left; }
+
+.weui-popup__modal {
+  width: 100%;
+  position: absolute;
+  z-index: 100;
+  bottom: 0;
+  border-radius: 0;
+  opacity: 0.6;
+  color: #3d4145;
+  transition-duration: .3s;
+  height: 100%;
+  background: #EFEFF4;
+  -webkit-transform: translate3d(0, 100%, 0);
+  transform: translate3d(0, 100%, 0);
+  transition-property: opacity, -webkit-transform;
+  transition-property: transform, opacity;
+  transition-property: transform, opacity, -webkit-transform;
+  overflow-x: hidden;
+  overflow-y: auto; }
+
+.popup-bottom .weui-popup__modal {
+  height: auto; }
+
+.weui-popup__modal .toolbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  z-index: 1; }
+
+.weui-popup__modal .modal-content {
+  height: 100%;
+  padding-top: 2.2rem;
+  overflow: auto;
+  box-sizing: border-box; }
+
+.weui-popup__container--visible .weui-popup-overlay {
+  opacity: 1; }
+
+.weui-popup__container--visible .weui-popup__modal {
+  opacity: 1;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0); }
+
+/*禁用掉所有的hover*/
+.c_no_active:active {
+  background-color: transparent !important; }
+
+#c_partners_list .icon {
+  font-size: 12px; }
+
+/*公用样式*/
+.c_main_color {
+  color: #F9665A; }
+
+.c_main_bg {
+  background-color: #F9665A; }
+
+.c_p_main_color {
+  color: #FF7339; }
+
+.c_p_main_bg {
+  background-color: #FF7339; }
+
+.c_p_10 {
+  padding: 10px; }
+
+.w_bg {
+  background-color: white; }
+
+.p_15 {
+  padding: 10px 15px; }
+
+.m_b_10 {
+  margin-bottom: 10px; }
+
+.c_f_l {
+  float: left; }
+
+.c_f_r {
+  float: right; }
+
+.c_link {
+  color: #ef4f4f; }
+
+.c_p_all_0 {
+  padding: 0px !important; }
+
+.c_m_all_0 {
+  margin: 0px; }
+
+.c_padding_b_10 {
+  padding-bottom: 10px; }
+
+.c_p_0 {
+  padding-left: 0px !important;
+  padding-right: 0px !important; }
+
+.t_border {
+  border-top: 1px solid #E6E6E6; }
+
+.c_c_color_gold {
+  color: #FDC300; }
+
+.c_weui_cell_no_b:before, .c_weui_cell_no_b:after {
+  border: none; }
+
+.c_media_width_100.weui_media_box .weui_media_hd {
+  width: 100px;
+  height: 70px;
+  border-right: 1px solid #ccc; }
+
+.c_f_blue {
+  color: #3D545E; }
+
+.c_weui_icon_success:before {
+  color: #3D545E; }
+
+.c_f_gray {
+  color: #999; }
+
+body {
+  font-size: 14px; }
+
+.c_panel_title {
+  color: #000;
+  padding: 10px 15px 10px; }
+
+.weui_media_box {
+  padding: 10px 15px; }
+
+.c_edit_icon {
+  background: url(../images/c_edit.png) no-repeat;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background-size: cover;
+  position: relative;
+  top: 2px;
+  left: 5px; }
+
+.weui_actionsheet {
+  max-height: 100%;
+  overflow: scroll; }
+
+.weui_cells_checkbox .weui_check:checked + .weui_icon_checked:before {
+  color: #F9665A; }
+
+/*首页*/
+#hometab {
+  color: #999; }
+
+#hometab .tab-red, #comments_tab .tab-red a {
+  color: #ef4f4f; }
+
+.home_title_swipe {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 60px;
+  background: url(../images/c_promo_title.png) no-repeat;
+  background-size: 40px;
+  background-position-x: 10px;
+  background-position-y: 10px;
+  background-color: white;
+  overflow: hidden; }
+
+.home_center_ad {
+  padding-top: 10px;
+  padding-bottom: 5px; }
+
+.home_title_swipe .c_sep {
+  position: absolute;
+  height: 24px;
+  line-height: 24px;
+  width: 1px;
+  background-color: #E6E6E6;
+  top: 8px;
+  left: 5px; }
+
+.c_scroll {
+  z-index: 1;
+  width: 100%;
+  background: white;
+  overflow: hidden;
+  padding: 10px 0px; }
+
+.scroll_inner {
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+  width: 5000px;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  -o-text-size-adjust: none;
+  text-size-adjust: none; }
+
+.scroll_inner ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: center; }
+
+.scroll_inner li {
+  width: 80px;
+  float: left;
+  text-align: center; }
+
+#kilo_img_list li {
+  width: 120px;
+  color: #F9665A;
+  position: relative; }
+
+#kilo_img_list .kilo_item1 {
+  color: #ccc; }
+
+#kilo_img_list .kilo_item1.kilo_item_line {
+  background-color: #ccc; }
+
+#kilo_img_list .kilo_item2 {
+  color: #F9665A; }
+
+#kilo_img_list .kilo_item2.kilo_item_line {
+  background-color: #F9665A; }
+
+#kilo_img_list .kilo_item3 {
+  color: orange; }
+
+#kilo_img_list .kilo_item3.kilo_item_line {
+  background-color: orange; }
+
+.kilo_item_t, .kilo_item_b {
+  font-size: 16px;
+  height: 30px;
+  line-height: 30px; }
+
+.kilo_item_b {
+  margin-top: 16px; }
+
+.kilo_item_line {
+  width: 33%;
+  height: 1px;
+  position: absolute;
+  top: 47px; }
+
+.kilo_item_line2 {
+  left: 33%; }
+
+.kilo_item_line3 {
+  left: 66%;
+  width: 34%; }
+
+.kilo_item_line .icon {
+  position: relative;
+  top: -12px;
+  left: 50%;
+  margin-left: -8px; }
+
+#car_img_list img {
+  width: 40px;
+  height: 40px; }
+
+.c_news_title {
+  display: block;
+  font-weight: 400;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-wrap: normal;
+  word-wrap: break-word;
+  word-break: break-all; }
+
+.c_panel_bottom {
+  padding: 10px 15px;
+  background: white; }
+
+.c_panel_bottom .weui_btn {
+  width: 200px;
+  border-radius: 50px;
+  font-size: 14px; }
+
+/*下单*/
+.priceWrapper span {
+  font-size: 12px;
+  padding-right: 5px; }
+
+.priceWrapper span:last-child {
+  font-size: 14px;
+  color: #F9665A; }
+
+.order_action .priceWrapper span {
+  font-size: 14px; }
+
+.order_action .priceWrapper span:last-child {
+  font-size: 16px;
+  font-weight: bold; }
+
+.c_media_width_40.weui_media_box .weui_media_hd {
+  width: 40px;
+  height: 40px; }
+
+.order_action {
+  position: fixed;
+  width: 100%;
+  bottom: 0px;
+  left: 0px;
+  background-color: white; }
+
+#requiredSection, #optionalSection {
+  line-height: 25px; }
+
+.next_step, .next_step2 {
+  background-color: #F9665A;
+  color: white;
+  margin-right: -15px;
+  padding: 0px 20px;
+  font-size: 16px; }
+
+.order_action .weui_media_box {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  height: 40px;
+  line-height: 40px; }
+
+.order_action .weui_media_hd {
+  height: 40px;
+  width: 70px;
+  text-align: left;
+  line-height: 40px;
+  border-right: 1px solid #ccc; }
+
+.order_goods_detail li {
+  width: 110px;
+  font-size: 14px;
+  margin: 0px;
+  padding: 0px 5px; }
+
+.order_goods_detail li .order_goods_attr_wapper {
+  border: 1px solid #999;
+  border-radius: 5px;
+  padding: 5px 0;
+  position: relative;
+  overflow: hidden; }
+
+.order_goods_attr_icon {
+  position: absolute;
+  right: -30px;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  width: 0;
+  height: 0;
+  border-left-width: 30px;
+  border-left-style: solid;
+  border-left-color: transparent;
+  border-right-width: 30px;
+  border-right-style: solid;
+  border-right-color: transparent;
+  border-bottom-width: 30px;
+  border-bottom-style: solid;
+  border-bottom-color: #F9665A;
+  font-size: 0;
+  line-height: 0;
+  visibility: hidden; }
+
+.order_goods_detail .icon_wrapper {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  color: white;
+  visibility: hidden; }
+
+.order_goods_attr_title {
+  padding-left: 5px;
+  padding-right: 5px; }
+
+.goodsAttrsWrapper {
+  padding-top: 0px; }
+
+.order_goods_attr_label {
+  border-top: 1px dashed #999;
+  padding: 5px 0px 0px;
+  margin-top: 5px; }
+
+.order_goods_detail li.checked .icon_wrapper,
+.order_goods_detail li.checked .order_goods_attr_icon {
+  visibility: visible; }
+
+.order_goods_detail li.checked .order_goods_attr_wapper {
+  border-color: #F9665A; }
+
+.order_goods_detail li.checked .order_goods_attr_label {
+  border-top: 1px dashed #F9665A; }
+
+/*站点*/
+#partner_nav_btn {
+  padding-left: 20px;
+  border-left: 1px solid #ccc;
+  height: 28px;
+  line-height: 28px; }
+
+#partner_info_rate_show span {
+  font-size: 26px; }
+
+.c_comment .weui-comment-msg, .c_comment_context {
+  padding-top: 10px;
+  margin-left: -45px; }
+
+.c_rate .weui-rater a {
+  font-size: 30px; }
+
+.c_rate .weui-rater a.checked, .c_rate .weui-rater a:hover {
+  color: #f96559; }
+
+/*我的*/
+.list_end_action {
+  font-size: 14px;
+  line-height: 40px; }
+
+.list_end_action .icon {
+  font-size: 24px;
+  padding-right: 10px; }
+
+.icon_extra_text {
+  position: relative;
+  top: -3px; }
+
+.list_center_action {
+  font-size: 14px;
+  padding-bottom: 30px;
+  line-height: 30px;
+  padding-top: 30px; }
+
+.list_center_action .icon {
+  font-size: 48px; }
+
+.c_qrcode {
+  width: 80px; }
+
+.c_panel .weui_cell_primary {
+  color: #888; }
+
+.c_panel .weui_cell_ft {
+  color: #333; }
+
+.c_panel_p {
+  padding-top: 15px;
+  padding-bottom: 15px; }
+
+.user_order_list_item .weui_cell {
+  padding: 5px 15px; }
+
+/*创建车辆*/
+.search-letters {
+  position: fixed;
+  top: 10%;
+  right: 5px;
+  font-family: 'Helvetica'; }
+
+.search-letters a {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  padding: 0px 5px; }
+
+.hot_brand_item {
+  width: 20%; }
+
+#specialPartnersInner a.checked {
+  border: 1px dashed #F9665A; }
+
+/*商家端*/
+.qrcode_big_icon {
+  background: #FF7339;
+  font-size: 80px;
+  color: white;
+  border-radius: 240px;
+  width: 240px;
+  display: inline-block;
+  height: 240px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 240px;
+  margin-top: 50px; }
+
+#p_home_nav a {
+  text-align: center;
+  color: #666; }
+
+#p_home_nav a.weui_bar_item_on, #p_home_nav .weui_tabbar_item.weui_bar_item_on .weui_tabbar_label {
+  color: #FF7339; }
+
+#p_home_nav .icon {
+  font-size: 30px;
+  line-height: 30px; }
+
+#p_home_nav .weui_tabbar_label {
+  font-size: 16px; }
+
+.p_body .weui_tab_nav .weui_nav_red, .p_body .weui_tab_nav .weui_nav_red.bg_red {
+  border-color: #FF7339; }
+
+.p_body .weui_tab_nav .weui_nav_red.bg_red {
+  background-color: #FF7339; }
+
+.p_orange {
+  color: #FF7339 !important; }
+
+.p_body .weui_btn_warn {
+  background-color: #FF7339; }
+
+.sta_section {
+  text-align: center;
+  background: #FF7339;
+  color: white;
+  padding: 15px 0px; }
+
+.p_sta_p {
+  font-weight: bold;
+  font-size: 20px; }
+
+.p_sta_label {
+  font-size: 14px; }
+
+.slide .dot .cur {
+  border-color: #F9665A;
+  background-color: #F9665A; }
+
+.weui_tabbar {
+  position: fixed; }
+
+.weui_media_box .weui_media_title {
+  font-size: 14px; }
+
+/*更换电瓶*/
+.steps {
+  margin: 10px 15px;
+  padding: 0;
+  overflow: hidden; }
+
+.steps a {
+  color: white;
+  text-decoration: none; }
+
+.steps em {
+  display: block;
+  font-size: 1.1em;
+  font-weight: bold; }
+
+.steps li {
+  float: left;
+  margin-left: 0;
+  width: 32%;
+  height: 30px;
+  list-style-type: none;
+  /* padding: 5px 5px 5px 30px; */
+  border-right: 2px solid white;
+  position: relative;
+  text-align: center;
+  line-height: 30px; }
+
+/* remove extra padding on the first object since it doesn't have an arrow to the left */
+.steps li:first-child {
+  padding-left: 5px; }
+
+/* white arrow to the left to "erase" background (starting from the 2nd object) */
+.steps li:nth-child(n+2)::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  border-left: 10px solid white;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  width: 0;
+  height: 0;
+  content: " "; }
+
+/* colored arrow to the right */
+.steps li::after {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  right: -10px;
+  display: block;
+  border-left: 10px solid #888;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  width: 0;
+  height: 0;
+  content: " "; }
+
+/* Setup colors (both the background and the arrow) */
+/* Completed */
+.steps li {
+  background-color: #888; }
+
+.steps li::after {
+  border-left-color: #888; }
+
+/* Current */
+.steps li.current {
+  background-color: #F9665A; }
+
+.steps li.current::after {
+  border-left-color: #F9665A; }
+
+/* Following */
+.steps li.current ~ li {
+  background-color: #888; }
+
+.steps li.current ~ li::after {
+  border-left-color: #888; }
+
+/* Hover for completed and current */
+.steps .c_weui_cell_no_b:after {
+  border: none; }
+
+.steps .step_first {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px; }
+
+.steps .step_end {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px; }
+
+.mini_weui_cells .weui_cell {
+  padding: 5px 15px;
+  font-size: 12px; }

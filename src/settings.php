@@ -1,5 +1,7 @@
 <?php
+define( 'SRC_PATH', __DIR__ . '/' );
 define( 'TEMPLATE_PATH', __DIR__ . '/../templates/' );
+
 return [
     'settings' => [
         'displayErrorDetails' => true, // set to false in production
@@ -17,12 +19,16 @@ return [
             'level' => \Monolog\Logger::DEBUG,
         ],
         'db'=>array(
-			'host' => '192.168.31.234',
+			'host' => '127.0.0.1',
 			'user' => 'root',
-			'password' => 'cheyoo',
+			'password' => '',
 			'driver' => 'pdo_mysql',
-			'port' => 3307,
+			'port' => 3306,
 			'dbname' => 'yu',
 		),
+        'wechat' => array(
+            'appID' => 'wx2c5bd898ceab87b7',
+            'appsecret' => 'd4624c36b6795d1d99dcf0547af5443d'
+        )
     ],
 ];
