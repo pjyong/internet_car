@@ -1,73 +1,90 @@
 <?php require_once( TEMPLATE_PATH . './header.phtml' ); ?>
-<div class="page__bd">
-    <div class="weui-cells">
-        <div class="weui-cell">
-            <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
-                <img src="images/pic_160.png" style="width: 50px;display: block">
-                <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
-                    <?php if($staffInfo['status'] == 1){
-                        echo '待审核';
-                    } else if($staffInfo['status'] == 2){
-                        echo '已审核';
-                    }
-                    ?>
-                </span>
-            </div>
-            <div class="weui-cell__bd">
-                <p><?php echo $staffInfo['name']; ?></p>
-                <p style="font-size: 13px;color: #888888;"><?php echo $staffInfo['department_name']; ?></p>
-            </div>
+<div class="weui_cells">
+    <div class="weui_cell">
+        <div class="weui_cell_hd" style="position: relative;margin-right: 10px;">
+            <img src="<?php echo $staffInfo['headimgurl'];?>" style="width: 50px;display: block">
+            <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
+                <?php if($staffInfo['status'] == 1){
+                    echo '待审核';
+                } else if($staffInfo['status'] == 2){
+                    echo '已审核';
+                }
+                ?>
+            </span>
         </div>
-        <div class="weui-cell">
-            <div class="weui-cell__bd">
-                <span style="vertical-align: middle">手机号</span>
-            </div>
-            <div class="weui-cell__ft"><?php echo $staffInfo['phone']; ?></div>
-        </div>
-        <div class="weui-cell">
-            <div class="weui-cell__bd">
-                <span style="vertical-align: middle">房间号</span>
-            </div>
-            <div class="weui-cell__ft"><?php echo $staffInfo['room']; ?></div>
-        </div>
-        <div class="weui-cell">
-            <div class="weui-cell__bd">
-                <span style="vertical-align: middle">加入时间</span>
-            </div>
-            <div class="weui-cell__ft"><?php echo $staffInfo['create_time']; ?></div>
+        <div class="weui_cell_bd">
+            <p><?php echo $staffInfo['name']; ?></p>
+            <p style="font-size: 13px;color: #888888;"><?php echo $staffInfo['department_name']; ?></p>
         </div>
     </div>
-    <?php if($showActions){ ?>
-    <div class="weui-cells weui-cells_form">
-        <div class="weui-cell weui-cell_select weui-cell_select-after">
-            <div class="weui-cell__hd">
-                <label for="" class="weui-label">选择部门</label>
-            </div>
-            <div class="weui-cell__bd">
-                <select class="weui-select" name="select2">
-                    <?php foreach($allDepartments as $id => $depa){ ?>
-                        <option value="<?php echo $id;?>"><?php echo $depa;?></option>
-                    <?php } ?>
-                </select>
-            </div>
+
+    <div class="weui_cell">
+        <div class="weui_cell_bd weui_cell_primary">
+            <p>手机号</p>
         </div>
-        <div class="weui-cell weui-cell_switch">
-            <div class="weui-cell__bd">审核状态</div>
-            <div class="weui-cell__ft">
-                <label for="switch_status" class="weui-switch-cp">
-                    <input id="switch_status" class="weui-switch-cp__input" type="checkbox" checked="checked">
-                    <div class="weui-switch-cp__box"></div>
-                </label>
-            </div>
+        <div class="weui_cell_ft"><?php echo $staffInfo['phone']; ?></div>
+    </div>
+    <div class="weui_cell">
+        <div class="weui_cell_bd weui_cell_primary">
+            <p>房间号</p>
         </div>
+        <div class="weui_cell_ft"><?php echo $staffInfo['room']; ?></div>
     </div>
-    <div class="weui-btn-area">
-        <a class="weui-btn weui-btn_primary" href="javascript:" id="saveStaffInfo">保存</a>
+    <div class="weui_cell">
+        <div class="weui_cell_bd weui_cell_primary">
+            <p>加入时间</p>
+        </div>
+        <div class="weui_cell_ft"><?php echo $staffInfo['create_time']; ?></div>
     </div>
-    <?php } ?>
 </div>
-<?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
+
+<?php if(!empty($issueList)){ ?>
+<div class="weui_panel weui_panel_access">
+    <div class="weui_panel_hd">近期问题</div>
+    <div class="weui_panel_bd">
+        <?php foreach($issueList as $issue){ ?>
+        <a href="/issue/detail/<?php echo $issue['id'];?>" class="weui_media_box weui_media_appmsg">
+            <div class="weui_media_hd">
+                <?php if(isset($issue['image_url'][0])){ ?>
+                <img class="weui_media_appmsg_thumb" src="<?php echo $issue['image_url'][0];?>" alt="">
+                <?php } ?>
+            </div>
+            <div class="weui_media_bd">
+                <p class="weui_media_desc"><?php echo $issue['description'];?></p>
+            </div>
+        </a>
+        <?php } ?>
+    </div>
+</div>
+<?php } ?>
+
+<?php if($showActions){ ?>
+<div class="weui_cells">
+    <div class="weui_cell weui_cell_select weui_select_after">
+        <div class="weui_cell_hd">
+            <label for="" class="weui_label">选择部门</label>
+        </div>
+        <div class="weui_cell_bd weui_cell_primary">
+            <select class="weui_select" name="select1">
+                <?php foreach($allDepartments as $id => $depa){ ?>
+                    <option value="<?php echo $id;?>"><?php echo $depa;?></option>
+                <?php } ?>
+            </select>
+        </div>
+    </div>
+    <div class="weui_cell weui_cell_switch">
+        <div class="weui_cell_hd weui_cell_primary">审核状态</div>
+        <div class="weui_cell_ft">
+            <input class="weui_switch" type="checkbox" checked="">
+        </div>
+    </div>
+</div>
+<div class="weui_btn_area">
+    <a id="saveStaffInfo" href="javascript:" class="weui_btn weui_btn_primary">保存</a>
+</div>
 <script>
 $(document).ready(function(){
 });
 </script>
+<?php } ?>
+<?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>

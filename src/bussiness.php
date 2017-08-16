@@ -13,7 +13,7 @@ function getCookie( $request, $cookieName ){
 
 function setCookieByName($response, $name, $value){
     $response = FigResponseCookies::set( $response,
-        SetCookieObj::create($name)->withValue($value)->rememberForever()
+        SetCookieObj::create($name)->withValue($value)->withPath('/')->rememberForever()
     );
     return $response;
 }
@@ -24,11 +24,13 @@ function getAbsoluteUrl( $extra )
     return "http://$host/" . $extra;
 }
 
-function checkAuth( $request, $response ){
-    // 从
+function checkAuth( $request ){
     if( !getCookie($request, 'id') ){
         $host  = $_SERVER['HTTP_HOST'];
-        header("Location: http://$host/oauth");
+        // 获取当前页面
+        $returnUrl = urlencode( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
+        logInfo("Location: http://$host/oauth?redirect_url=".$returnUrl);
+        header("Location: http://$host/oauth?redirect_url=".$returnUrl);
         exit;
     }
 }
@@ -85,10 +87,20 @@ function insertStaff( $info )
     return $db->lastInsertId();
 }
 
+function insertIssue( $info )
+{
+    global $db;
+    $info['create_time'] = date('Y-m-d H:i:s');
+    $db->insert( 'issue', $info );
+    return $db->lastInsertId();
+}
+
 // 保存用户资料
 function saveStaffInfo( $info, $staffID )
 {
     global $db;
+    $info['status'] = 1;
+    $info['create_time'] = date('Y-m-d H:i:s');
     $db->update( 'staff', $info, array('id'=>$staffID) );
 }
 
@@ -124,7 +136,7 @@ function getDepartmentList()
 {
     return array(
         1 => '技术部',
-        2 => '其它部门'
+        0 => '其它部门'
     );
 }
 
@@ -132,4 +144,50 @@ function getDepartmentList()
 function checkTechDepartment( $id )
 {
     return $id == 1 ? true : false;
+}
+
+function getIssueListByStaffID( $staffID ){
+    global $db;
+    $allIssues = $db->fetchAll( 'SELECT * FROM issue WHERE staff_id = ? order by id desc', array( $staffID ) );
+    if($allIssues){
+        foreach($allIssues as $k => $v){
+            if($v['image_url']){
+                $images = explode(',', $v['image_url']);
+                foreach($images as $k2 => $v2){
+                    $images[$k2] = getAbsoluteUrl($v2);
+                }
+                $allIssues[$k]['image_url'] = $images;
+            }
+        }
+    }
+
+    return $allIssues;
+}
+
+// 获取详细信息
+function getIssueDetail( $id )
+{
+    global $db;
+    $issueInfo = $db->fetchAssoc( 'SELECT * FROM issue WHERE id = ?', array($id) );
+
+    return $issueInfo;
+}
+
+// 文件图片上传
+function saveToImage( $data, $fileType = 'image/jpeg' ){
+
+    $file = SRC_PATH . '../upload/' . date("dMYHis.");
+    if( $fileType == 'image/jpeg' || $fileType == 'image/jpg' ){
+        $file .= 'jpg';
+    }else if( $fileType == 'image/png' ){
+        $file .= 'png';
+    }
+    // $data = str_replace("%26", '&', $data);
+    // $data = str_replace("%2B", '+', $data);
+    $data = base64_decode( str_replace('data:'.$fileType.';base64,', '',$data) );
+    $fp = fopen($file, 'w');
+    fwrite($fp, $data);
+    fclose($fp);
+
+    return str_replace( SRC_PATH . '../', '', $file);
 }

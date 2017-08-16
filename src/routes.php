@@ -90,16 +90,16 @@ $app->post('/entrance', function ($request, $response, $args) use($app) {
     exit;
 });
 
-// 返回
-
 // 微信授权
-$app->get('/oauth', function ($request, $response, $args) {
+$app->get('/oauth', function ($request, $response, $args) use( $app ) {
     require_once SRC_PATH . 'wechat-php-sdk/wechat.class.php';
-    $weObj = new Wechat( $this->getContainer()->get('settings')['wechat'] );
+    $weObj = new Wechat( $app->getContainer()->get('settings')['wechat'] );
     $weObj->valid( true ); //明文或兼容模式可以在接口验证通过后注释此句，但加密模式一定不能注释，否则会验证失败
-    $returnUrl = !empty( $args['redirect_url'] ) ? $args['redirect_url'] : getAbsoluteUrl('profile');
-    $params = '?redirect_url=' . urlencode( $returnUrl );
+    $returnUrl = $request->getParam('redirect_url') ? $request->getParam('redirect_url') : getAbsoluteUrl('profile');
+    $params = '?redirect_url=' . $returnUrl;
+    $params .= $request->getParam('wechatfrom') ? '&wechatfrom=' . trim($request->getParam('wechatfrom')) : '';
     $redirectURI = $weObj->getOauthRedirect( 'http://partner.cheyuu.com/oauth' . $params );
+    logInfo($redirectURI);
     $openID = getCookie( $request, 'openid');
     if ( $openID ) {													// openID 存在
         if ( !getCookie( $request, 'id') ){
@@ -109,11 +109,10 @@ $app->get('/oauth', function ($request, $response, $args) {
             $response = setCookieByName($response, 'id', $staffID );
             return $response->withHeader('Location', $returnUrl);
         }
-    } else {																// openid 不存在
-        if (empty($_GET['code'])){
+    } else {
+        if ( !$request->getParam('code') ){
             return $response->withHeader('Location', $redirectURI);
         }
-
         $oauth = $weObj->getOauthAccessToken();
         if (empty($oauth)){
             return $response->withHeader('Location', $redirectURI);
@@ -125,9 +124,9 @@ $app->get('/oauth', function ($request, $response, $args) {
             // 如果已经存在
         }else{
             // 插入新成员记录
-            $userInfo = $weObj->getUserInfo($openID);
+            $userInfo = $weObj->getUserInfo($oauth["openid"]);
             $staffInfo = array(
-                'open_id' => $openID,
+                'open_id' => $oauth["openid"],
                 'nickname' => $userInfo['nickname'],
                 'sex' => $userInfo['sex'],
                 'subscribe_time' => date('Y-m-d H:i:s', $userInfo['subscribe_time']),
@@ -141,60 +140,53 @@ $app->get('/oauth', function ($request, $response, $args) {
     return $response->withHeader('Location', $returnUrl);
 });
 
-// 填写相关资料,提交等待审核
-$app->get('/profile/fill', function ($request, $response, $args) {
-
-    checkAuth( $request, $response );
-
-    print getCookie($request, 'id');
-    print '<br/>';
-    print getCookie($request, 'openid');
-    exit;
-
-    return $this->renderer->render($response, 'fill_profile.phtml', $args);
-});
-
-// 填写预约问题的相关信息,提交等待确认预约
-$app->get('/issue/fill', function ($request, $response, $args) {
-
-    return $this->renderer->render($response, 'fill_issue.phtml', $args);
-});
-
 // 显示相关资料,正在审核或者开始预约
 $app->get('/profile[/id/{id}]', function ($request, $response, $args) {
-    $staffIDFromCookie = 2;
-    $depaFromCookie = 1;
+    checkAuth( $request );
+    $staffIDFromCookie = getCookie($request, 'id');
     $showActions = false;
     if( !empty($args['id']) ){
-        $staffID = $args['id'];
+        // 查看他人的资料
+        if( $args['id'] == $staffIDFromCookie ){
+            return $response->withHeader('Location', getAbsoluteUrl('profile') );
+        }
+        $staffInfo = getStaffInfoByID( $args['id'] );
+        if(!$staffInfo || $staffInfo['status'] == 0){
+            return $response->withHeader('Location', '/error');
+        }
+        // 获取当前登录用户的部门
+        // 1.被审核的人不是本人 2.审核人是技术部门
+        $currentStaffInfo = getStaffInfoByID( $staffIDFromCookie );
+        $showActions = checkTechDepartment( $currentStaffInfo['department'] ) ? true : false;
+        $title = '他的资料';
+        $issueList = getIssueListByStaffID( $args['id'] );
     } else {
-        $staffID = $staffIDFromCookie;
+        // 查看自己的资料
+        $staffInfo = getStaffInfoByID( $staffIDFromCookie );
+        $title = '我的资料';
+        $issueList = getIssueListByStaffID( $staffIDFromCookie );
     }
-    $staffInfo = getStaffInfoByID( $staffID );
-    if(!$staffInfo || $staffInfo['status'] == 0){
-        // $this->logger->info( '不存在或状态' );
-        return $response->withHeader('Location', '/error');
-    }
-    // 1.被审核的人不是本人 2.审核人是技术部门
-    if( $staffIDFromCookie != $staffID && checkTechDepartment( $depaFromCookie ) ){
-        $showActions = true;
-    }
+
     return $this->renderer->render($response, 'profile.phtml', array(
+        'title' => $title,
         'staffInfo' => $staffInfo,
         'showActions' => $showActions,
         'allDepartments' => getDepartmentList(),
+        'issueList' => $issueList,
     ));
 });
 
-// 员工列表
-$app->get('/staffs', function ($request, $response, $args) {
-    // 获取所有员工列表
-    return $response->withJson( array('id'=>1) );
+// 填写相关资料,提交等待审核
+$app->get('/profile/fill', function ($request, $response, $args) {
+    checkAuth( $request );
+    return $this->renderer->render($response, 'fill_profile.phtml', array(
+        'title' => '完善资料',
+    ));
 });
-
 // 保存用户提交的审核资料
 $app->post('/profile/save', function ($request, $response, $args) {
-    $staffIDFromCookie = 1;
+    checkAuth( $request );
+    $staffIDFromCookie = getCookie($request, 'id');
     saveStaffInfo( $request->getParams(), $staffIDFromCookie );
     return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
 });
@@ -206,9 +198,57 @@ $app->post('/profile/comfirm', function ($request, $response, $args) {
     return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
 });
 
+// 所有问题列表
+$app->get('/issue/stauts/[status]', function ($request, $response, $args) {
+    checkAuth( $request );
+
+    return $this->renderer->render($response, 'issue_list.phtml', $args);
+});
+
+// 问题详情
+$app->get('/issue/detail/[id]', function ($request, $response, $args) {
+    checkAuth( $request );
+    
+
+    return $this->renderer->render($response, 'issue_detail.phtml', $args);
+});
+
+// 问题图片上传
+$app->post('/issue/image/upload', function ($request, $response, $args) {
+    checkAuth( $request );
+    $filepath = saveToImage( $request->getParam('base64'), $request->getParam('suffix'));
+
+    return $response->withJson( array('status'=>true, 'msg'=>'操作成功', 'path' => $filepath) );
+});
+
+// 填写预约问题的相关信息,提交等待确认预约
+$app->get('/issue/fill', function ($request, $response, $args) {
+    checkAuth( $request );
+
+    return $this->renderer->render($response, 'fill_issue.phtml', $args);
+});
+
+// 保存问题
+$app->post('/issue/save', function ($request, $response, $args) {
+    checkAuth( $request );
+    $data = array(
+        'description' => $request->getParam('description'),
+        'image_url' => implode(',', $request->getParam('image_url')),
+        'staff_id' => getCookie($request, 'id')
+    );
+    insertIssue($data);
+    return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
+});
+
+// 员工列表
+$app->get('/staffs', function ($request, $response, $args) {
+    // 获取所有员工列表
+    return $response->withJson( array('id'=>1) );
+});
+
 // 测试
 $app->get('/test', function ($request, $response, $args) {
-
+    echo urldecode('http%3A%2F%2Fpartner.cheyuu.com%2Foauth%3Fredirect_url%3Dhttp%3A%2F%2Fpartner.cheyuu.com%2Fprofile%2Ffill');exit;
     return $response->withJson( array('id'=>1) );
 });
 
