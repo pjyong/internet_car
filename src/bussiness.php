@@ -1,5 +1,49 @@
 <?php
+
+use Dflydev\FigCookies\FigRequestCookies;
+use Dflydev\FigCookies\FigResponseCookies;
+use Dflydev\FigCookies\SetCookie as SetCookieObj;
+
 $db = $container->db;
+
+// $cookies = Dflydev\FigCookies\Cookies::fromRequest($request);
+function getCookie( $request, $cookieName ){
+    return FigRequestCookies::get($request, $cookieName)->getValue();
+}
+
+function setCookieByName($response, $name, $value){
+    $response = FigResponseCookies::set( $response,
+        SetCookieObj::create($name)->withValue($value)->rememberForever()
+    );
+    return $response;
+}
+
+function getAbsoluteUrl( $extra )
+{
+    $host  = $_SERVER['HTTP_HOST'];
+    return "http://$host/" . $extra;
+}
+
+function checkAuth( $request, $response ){
+    // 从
+    if( !getCookie($request, 'id') ){
+        $host  = $_SERVER['HTTP_HOST'];
+        header("Location: http://$host/oauth");
+        exit;
+    }
+}
+
+function logInfo( $logInfo )
+{
+    global $container;
+    $container['logger']->info( $logInfo );
+}
+
+function checkUserExistsByOpenID( $openID ){
+    global $db;
+    $num = (int)$db->fetchColumn( 'SELECT COUNT(*) FROM staff WHERE open_id = ?', array($openID) );
+    return (bool)$num;
+}
 
 function getStaffInfoByID( $id )
 {
@@ -12,6 +56,12 @@ function getStaffInfoByID( $id )
 
     return $staffInfo;
 }
+
+function getStaffIDByOpenID( $openID ){
+    global $db;
+    return  $db->fetchColumn( 'SELECT id FROM staff where open_id = ?', array($openID) );
+}
+
 
 // 根据成员ID获取未解决问题(结合comfirm时间点)
 function getUnsolvedIssueByStaffID( $id )
@@ -26,6 +76,13 @@ function getStaffListByStatus( $status )
     $staffList = $db->fetchAll( 'SELECT * FROM staff WHERE status = ?', array($status) );
 
     return $staffList;
+}
+
+function insertStaff( $info )
+{
+    global $db;
+    $db->insert( 'staff', $info );
+    return $db->lastInsertId();
 }
 
 // 保存用户资料

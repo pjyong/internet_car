@@ -19,16 +19,19 @@ return [
             'level' => \Monolog\Logger::DEBUG,
         ],
         'db'=>array(
-			'host' => '127.0.0.1',
+			'host' => '101.200.47.51',
 			'user' => 'root',
-			'password' => '',
+			'password' => 'KeYpZrZx',
 			'driver' => 'pdo_mysql',
 			'port' => 3306,
 			'dbname' => 'yu',
 		),
         'wechat' => array(
-            'appID' => 'wx2c5bd898ceab87b7',
-            'appsecret' => 'd4624c36b6795d1d99dcf0547af5443d'
+            'token' => 'fdasdfas323232',
+            'appid' => 'wx2c5bd898ceab87b7',
+            'appsecret' => 'd4624c36b6795d1d99dcf0547af5443d',
+            'debug' => true,
+            'logcallback' => 'logInfo'
         )
     ],
 ];
