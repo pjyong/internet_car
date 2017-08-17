@@ -1,0 +1,58 @@
+<?php require_once( TEMPLATE_PATH . './header.phtml' ); ?>
+
+<div class="weui_panel">
+<div class="weui_panel_hd">
+<div class="weui_tab" style="height:44px;" id="tab5">
+    <div class="weui_tab_nav">
+        <a href="/issue/status/0" class="weui_navbar_item weui_nav_green <?=$status==0?'bg_green':''?>"> 待确认 </a>
+        <a href="/issue/status/1" class="weui_navbar_item weui_nav_green <?=$status==1?'bg_green':''?>"> 已确认 </a>
+    </div>
+ </div>
+ </div>
+ </div>
+
+ <?php if(!empty($issueList)){ ?>
+<div class="weui_panel weui_panel_access">
+    <div class="weui_panel_bd">
+        <?php foreach($issueList as $issue){ ?>
+        <a href="/issue/detail/<?php echo $issue['id'];?>" class="weui_media_box weui_media_text weui_media_appmsg">
+            <div class="weui_media_hd" style="position: relative;margin-right: 10px;">
+                <?php if(isset($issue['image_url'][0])){ ?>
+                <img class="weui_media_appmsg_thumb" src="<?php echo $issue['image_url'][0];?>" alt="">
+                <?php } ?>
+                    <?php if($issue['confirm_status'] == 1){ ?>
+                        <span class="weui-badge success" style="position: absolute;top: -.4em;right: -.4em;">
+                        已确认
+                        </span>
+                    <?php } else{ ?>
+                        <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
+                        待确认
+                        </span>
+                    <?php } ?>
+            </div>
+            <div class="weui_media_bd">
+                <p class="weui_media_desc"><?php echo $issue['description'];?></p>
+                <ul class="weui_media_info">
+                    <?php if($issue['confirm_status'] == 1){ ?>
+                        <li class="weui_media_info_meta ">预约号:<?php echo $issue['serve_no'];?></li>
+                        <li class="weui_media_info_meta weui_media_info_meta_extra">预约时间:<?php echo getShortTime( $issue['serve_time'] );?></li>
+                    <?php }else{ ?>
+                        <li class="weui_media_info_meta">
+                            创建时间:<?php echo getShortTime( $issue['create_time'] );?>
+                        </li>
+                    <?php } ?>
+                </ul>
+            </div>
+        </a>
+        <?php } ?>
+    </div>
+</div>
+<?php }else{ ?>
+    <div class="weui_msg hide" id="msg1" style="display: block; opacity: 1;">
+        <div class="weui_text_area">
+            <p class="weui_msg_desc">此栏目没有任何数据哦</p>
+        </div>
+    </div>
+<?php } ?>
+
+<?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>

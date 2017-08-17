@@ -25,12 +25,23 @@ function getAbsoluteUrl( $extra )
 }
 
 function checkAuth( $request ){
+    $host  = $_SERVER['HTTP_HOST'];
     if( !getCookie($request, 'id') ){
-        $host  = $_SERVER['HTTP_HOST'];
         // 获取当前页面
         $returnUrl = urlencode( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
-        logInfo("Location: http://$host/oauth?redirect_url=".$returnUrl);
         header("Location: http://$host/oauth?redirect_url=".$returnUrl);
+        exit;
+    }
+
+    // 检查这个用户的状态
+    $currentID = getCookie($request, 'id');
+    $currentInfo = getStaffInfoByID( $currentID );
+    if($currentInfo['status'] == 0 && $_SERVER["REQUEST_URI"] != '/profile/fill'
+        &&  $_SERVER["REQUEST_URI"] !='/profile/save'){
+        header("Location: http://$host/profile/fill");
+        exit;
+    } else if($currentInfo['status'] == 1 && $_SERVER["REQUEST_URI"] != '/profile'){
+        header("Location: http://$host/profile");
         exit;
     }
 }
@@ -105,14 +116,18 @@ function saveStaffInfo( $info, $staffID )
 }
 
 // 审核成员
-function confirmStaff( $staffID, $department )
+function confirmStaff( $staffID, $status, $department )
 {
     global $db;
-    $db->update( 'staff', array('status'=>2, 'department'=>$department), array('id'=>$staffID) );
+    $db->update( 'staff', array(
+        'department'=>$department,
+        'status' => $status,
+        'department' => $department
+    ), array('id'=>$staffID) );
 }
 
 // 确认预约时间
-function comfirmIssue( $issueID, $confirmStaffID )
+function comfirmIssue( $issueID, $serveTime, $confirmStaffID )
 {
     global $db;
     $db->update( 'issue', array(
@@ -120,6 +135,7 @@ function comfirmIssue( $issueID, $confirmStaffID )
         'confirm_time'=>date('Y-m-d H:i:s'),
         'confirm_staff_id'=>$confirmStaffID,
         'serve_no'=>getNewServeNO(),
+        'serve_time'=>$serveTime,
     ), array('id'=>$issueID) );
 }
 
@@ -135,9 +151,16 @@ function getNewServeNO(){
 function getDepartmentList()
 {
     return array(
+        0 => '其它部门',
         1 => '技术部',
-        0 => '其它部门'
     );
+}
+
+// 检查某个人是不是技术部门的
+function checkTechPeople( $staffID )
+{
+    $staffInfo = getStaffInfoByID($staffID);
+    return checkTechDepartment( $staffInfo['department'] );
 }
 
 // 检查是否有权限做审核
@@ -164,11 +187,37 @@ function getIssueListByStaffID( $staffID ){
     return $allIssues;
 }
 
+function getIssueListByStatus( $confirmStatus )
+{
+    global $db;
+    $allIssues = $db->fetchAll( 'SELECT * FROM issue WHERE confirm_status = ? order by id desc', array( $confirmStatus ) );
+    if($allIssues){
+        foreach($allIssues as $k => $v){
+            if($v['image_url']){
+                $images = explode(',', $v['image_url']);
+                foreach($images as $k2 => $v2){
+                    $images[$k2] = getAbsoluteUrl($v2);
+                }
+                $allIssues[$k]['image_url'] = $images;
+            }
+        }
+    }
+
+    return $allIssues;
+}
+
 // 获取详细信息
 function getIssueDetail( $id )
 {
     global $db;
     $issueInfo = $db->fetchAssoc( 'SELECT * FROM issue WHERE id = ?', array($id) );
+    if($issueInfo['image_url']){
+        $images = explode(',', $issueInfo['image_url']);
+        foreach($images as $k2 => $v2){
+            $images[$k2] = getAbsoluteUrl($v2);
+        }
+        $issueInfo['image_url'] = $images;
+    }
 
     return $issueInfo;
 }
@@ -190,4 +239,10 @@ function saveToImage( $data, $fileType = 'image/jpeg' ){
     fclose($fp);
 
     return str_replace( SRC_PATH . '../', '', $file);
+}
+
+// 提取出时间
+function getShortTime( $d )
+{
+    return date('m月d日H点左右', strtotime($d));
 }

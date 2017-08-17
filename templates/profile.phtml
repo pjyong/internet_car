@@ -3,7 +3,7 @@
     <div class="weui_cell">
         <div class="weui_cell_hd" style="position: relative;margin-right: 10px;">
             <img src="<?php echo $staffInfo['headimgurl'];?>" style="width: 50px;display: block">
-            <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
+            <span class="weui-badge <?=$staffInfo['status'] == 2?'success':''?>" style="position: absolute;top: -.4em;right: -.4em;">
                 <?php if($staffInfo['status'] == 1){
                     echo '待审核';
                 } else if($staffInfo['status'] == 2){
@@ -38,19 +38,46 @@
     </div>
 </div>
 
+<?php if($isMyProfile && $staffInfo['status'] == 1){ ?>
+    <div class="weui_msg hide" id="msg1" style="display: block; opacity: 1;">
+        <div class="weui_text_area">
+            <p class="weui_msg_desc">温馨提示:只有审核通过才能查看其它成员和提问题额</p>
+        </div>
+    </div>
+<?php } ?>
+
 <?php if(!empty($issueList)){ ?>
 <div class="weui_panel weui_panel_access">
     <div class="weui_panel_hd">近期问题</div>
     <div class="weui_panel_bd">
         <?php foreach($issueList as $issue){ ?>
-        <a href="/issue/detail/<?php echo $issue['id'];?>" class="weui_media_box weui_media_appmsg">
-            <div class="weui_media_hd">
+        <a href="/issue/detail/<?php echo $issue['id'];?>" class="weui_media_box weui_media_text weui_media_appmsg">
+            <div class="weui_media_hd" style="position: relative;margin-right: 10px;">
                 <?php if(isset($issue['image_url'][0])){ ?>
                 <img class="weui_media_appmsg_thumb" src="<?php echo $issue['image_url'][0];?>" alt="">
                 <?php } ?>
+                    <?php if($issue['confirm_status'] == 1){ ?>
+                        <span class="weui-badge success" style="position: absolute;top: -.4em;right: -.4em;">
+                        已确认
+                        </span>
+                    <?php } else{ ?>
+                        <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
+                        待确认
+                        </span>
+                    <?php } ?>
             </div>
             <div class="weui_media_bd">
                 <p class="weui_media_desc"><?php echo $issue['description'];?></p>
+                <ul class="weui_media_info">
+                    <?php if($issue['confirm_status'] == 1){ ?>
+                        <li class="weui_media_info_meta ">预约号:<?php echo $issue['serve_no'];?></li>
+                        <li class="weui_media_info_meta weui_media_info_meta_extra">预约时间:<?php echo getShortTime( $issue['serve_time'] );?></li>
+                    <?php }else{ ?>
+                        <li class="weui_media_info_meta">
+                            创建时间:<?php echo $issue['create_time'];?>
+                        </li>
+                    <?php } ?>
+                </ul>
             </div>
         </a>
         <?php } ?>
@@ -65,9 +92,9 @@
             <label for="" class="weui_label">选择部门</label>
         </div>
         <div class="weui_cell_bd weui_cell_primary">
-            <select class="weui_select" name="select1">
+            <select class="weui_select" name="select1" id="select1">
                 <?php foreach($allDepartments as $id => $depa){ ?>
-                    <option value="<?php echo $id;?>"><?php echo $depa;?></option>
+                    <option value="<?php echo $id;?>" <?=$staffInfo['department']==$id?'selected':''?>><?php echo $depa;?></option>
                 <?php } ?>
             </select>
         </div>
@@ -75,7 +102,7 @@
     <div class="weui_cell weui_cell_switch">
         <div class="weui_cell_hd weui_cell_primary">审核状态</div>
         <div class="weui_cell_ft">
-            <input class="weui_switch" type="checkbox" checked="">
+            <input id="status" class="weui_switch" type="checkbox" <?=$staffInfo['status']==2?'checked':''?>>
         </div>
     </div>
 </div>
@@ -84,7 +111,39 @@
 </div>
 <script>
 $(document).ready(function(){
+    $('#saveStaffInfo').click(function(){
+        var data = {};
+        data.department = $('#select1').val();
+        data.status = $('#status').prop('checked') ? 2 : 1;
+        data.id = <?=$staffInfo['id']?>;
+        $.showLoading();
+        $.ajax({
+            type: 'post',
+            url: '/profile/comfirm',
+            dataType: 'json',
+            data: data,
+            success: function (data) {
+                $.hideLoading();
+                if(data.status){
+                    renderAjaxRespDiv({
+                        status: true,
+                        url: '/profile/id/<?=$staffInfo['id']?>',
+                        urltext: '查看该用户状态',
+                    });
+                } else {
+                    $.toast(data.msg);
+                }
+            }
+        });
+    });
 });
 </script>
 <?php } ?>
+
+<?php if($hasPermissionToCreateIssue){ ?>
+    <div class="weui_btn_area">
+        <a href="/issue/fill" class="weui_btn weui_btn_primary">创建问题</a>
+    </div>
+<?php } ?>
+
 <?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>

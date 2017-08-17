@@ -119,3 +119,7 @@ body {
 .weui_actionsheet {
   max-height: 100%;
   overflow: scroll; }
+
+.weui-badge.success{
+  background-color:#04be02;
+  }

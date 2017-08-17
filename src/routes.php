@@ -74,8 +74,8 @@ $app->post('/entrance', function ($request, $response, $args) use($app) {
                         );
                         $staffID = insertStaff( $staffInfo );
                         $this->logger->info( '刚刚有成员ID为'.$staffID.'的同学关注了' );
-
                         // Todo::推送一个模板消息提示告诉用户完善资料
+                        $weObj->text("http://partner.cheyuu.com/profile")->reply();
                     }
                     break;
                 case Wechat::EVENT_UNSUBSCRIBE :
@@ -160,11 +160,22 @@ $app->get('/profile[/id/{id}]', function ($request, $response, $args) {
         $showActions = checkTechDepartment( $currentStaffInfo['department'] ) ? true : false;
         $title = '他的资料';
         $issueList = getIssueListByStaffID( $args['id'] );
+        $hasPermissionToCreateIssue = false;
+        $isMyProfile = false;
     } else {
         // 查看自己的资料
         $staffInfo = getStaffInfoByID( $staffIDFromCookie );
+        if($staffInfo['status'] == 0){
+            // 去完善资料
+            return $response->withHeader('Location', '/profile/fill');
+        }
         $title = '我的资料';
         $issueList = getIssueListByStaffID( $staffIDFromCookie );
+        $hasPermissionToCreateIssue = true;
+        if($staffInfo['status'] != 2){
+            $hasPermissionToCreateIssue = false;
+        }
+        $isMyProfile = true;
     }
 
     return $this->renderer->render($response, 'profile.phtml', array(
@@ -173,6 +184,8 @@ $app->get('/profile[/id/{id}]', function ($request, $response, $args) {
         'showActions' => $showActions,
         'allDepartments' => getDepartmentList(),
         'issueList' => $issueList,
+        'hasPermissionToCreateIssue' => $hasPermissionToCreateIssue,
+        'isMyProfile' => $isMyProfile,
     ));
 });
 
@@ -183,6 +196,7 @@ $app->get('/profile/fill', function ($request, $response, $args) {
         'title' => '完善资料',
     ));
 });
+
 // 保存用户提交的审核资料
 $app->post('/profile/save', function ($request, $response, $args) {
     checkAuth( $request );
@@ -193,24 +207,51 @@ $app->post('/profile/save', function ($request, $response, $args) {
 
 // 保存用户审核结果
 $app->post('/profile/comfirm', function ($request, $response, $args) {
-    confirmStaff( $args['staffID'], $args['department'] );
+    checkAuth( $request );
+    confirmStaff(
+        $request->getParam('id'),
+        $request->getParam('status'),
+        $request->getParam('department')
+    );
 
     return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
 });
 
 // 所有问题列表
-$app->get('/issue/stauts/[status]', function ($request, $response, $args) {
+$app->get('/issue/status/{status}', function ($request, $response, $args) {
     checkAuth( $request );
 
-    return $this->renderer->render($response, 'issue_list.phtml', $args);
+    $allIssues = getIssueListByStatus($args['status']);
+    return $this->renderer->render($response, 'issue_list.phtml', array(
+        'issueList' => $allIssues,
+        'status' => $args['status'],
+        'title' => '问题列表',
+    ));
 });
 
 // 问题详情
-$app->get('/issue/detail/[id]', function ($request, $response, $args) {
+$app->get('/issue/detail/{id}', function ($request, $response, $args) {
     checkAuth( $request );
-    
+    //
+    $issueInfo = getIssueDetail($args['id']);
+    if(!$issueInfo){
+        return $response->withHeader('Location', '/error');
+    }
+    $issueStaffInfo = getStaffInfoByID($issueInfo['staff_id']);
 
-    return $this->renderer->render($response, 'issue_detail.phtml', $args);
+    return $this->renderer->render($response, 'issue_detail.phtml', array(
+        'issueInfo' => $issueInfo,
+        'issueStaffInfo' => $issueStaffInfo,
+        'belongTech' => checkTechPeople( getCookie($request, 'id') ),
+        'title' => '问题详情',
+    ));
+});
+
+// 预约问题保存
+$app->post('/issue/confirm', function ($request, $response, $args) {
+    checkAuth( $request );
+    comfirmIssue($request->getParam('id'), $request->getParam('serve_time'), getCookie($request, 'id'));
+    return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
 });
 
 // 问题图片上传
@@ -224,8 +265,9 @@ $app->post('/issue/image/upload', function ($request, $response, $args) {
 // 填写预约问题的相关信息,提交等待确认预约
 $app->get('/issue/fill', function ($request, $response, $args) {
     checkAuth( $request );
-
-    return $this->renderer->render($response, 'fill_issue.phtml', $args);
+    return $this->renderer->render($response, 'fill_issue.phtml', array(
+        'title' => '创建问题',
+    ));
 });
 
 // 保存问题
@@ -233,27 +275,47 @@ $app->post('/issue/save', function ($request, $response, $args) {
     checkAuth( $request );
     $data = array(
         'description' => $request->getParam('description'),
-        'image_url' => implode(',', $request->getParam('image_url')),
         'staff_id' => getCookie($request, 'id')
     );
+    if(!empty($request->getParam('image_url'))){
+        $data['image_url'] = implode(',', $request->getParam('image_url'));
+    }
     insertIssue($data);
     return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
 });
 
+
 // 员工列表
-$app->get('/staffs', function ($request, $response, $args) {
+$app->get('/staffs/status/{status}', function ($request, $response, $args) {
+    checkAuth( $request );
     // 获取所有员工列表
-    return $response->withJson( array('id'=>1) );
+    $staffList = getStaffListByStatus($args['status']);
+
+    return $this->renderer->render($response, 'staff_list.phtml', array(
+        'staffList' => $staffList,
+        'status' => $args['status'],
+        'title' => '员工列表'
+    ));
 });
+
+// 清楚所有数据
+$app->get('/clear', function ($request, $response, $args) {
+    $response = setCookieByName( $response, 'id', 0);
+    $response = setCookieByName( $response, 'openid', '');
+    return $this->renderer->render($response, 'error.phtml', array(
+    ));
+});
+
 
 // 测试
 $app->get('/test', function ($request, $response, $args) {
-    echo urldecode('http%3A%2F%2Fpartner.cheyuu.com%2Foauth%3Fredirect_url%3Dhttp%3A%2F%2Fpartner.cheyuu.com%2Fprofile%2Ffill');exit;
     return $response->withJson( array('id'=>1) );
 });
 
 // 所有的错误页面
 $app->get('/error', function ($request, $response, $args) {
+    // $response = setCookieByName( $response, 'id', 6 );
     return $this->renderer->render($response, 'error.phtml', array(
+        'title' => '您走错了地方'
     ));
 });

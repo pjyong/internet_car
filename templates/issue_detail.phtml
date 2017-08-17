@@ -1,0 +1,110 @@
+<?php require_once( TEMPLATE_PATH . './header.phtml' ); ?>
+
+<div id="step1">
+<div class="weui-form-preview">
+    <div class="weui-form-preview-hd">
+        <label class="weui-form-preview-label"><?php echo $issueStaffInfo['name']; ?></label>
+        <em class="weui-form-preview-value"><?php echo $issueStaffInfo['room']; ?></em>
+    </div>
+    <div class="weui-form-preview-bd">
+        <?php if($issueInfo['confirm_status'] == 1){ ?>
+            <p>
+                <label class="weui-form-preview-label f-green">预约号:</label>
+                <span class="weui-form-preview-value f31 f-green"><?php echo $issueInfo['serve_no']; ?></span>
+            </p>
+            <p>
+                <label class="weui-form-preview-label f-green">预约时间:</label>
+                <span class="weui-form-preview-value f-green"><?php echo $issueInfo['serve_time']; ?></span>
+            </p>
+        <?php } ?>
+        <p>
+            <label class="weui-form-preview-label">问题描述:</label>
+            <span class="weui-form-preview-value"><?php echo $issueInfo['description']; ?></span>
+        </p>
+        <p>
+            <label class="weui-form-preview-label">手机号:</label>
+            <span class="weui-form-preview-value"><?php echo $issueStaffInfo['phone']; ?></span>
+        </p>
+        <p>
+            <label class="weui-form-preview-label">创建时间:</label>
+            <span class="weui-form-preview-value"><?php echo $issueInfo['create_time']; ?></span>
+        </p>
+
+        <div class="weui_cell_bd weui_cell_primary">
+            <div class="weui_uploader">
+                <div class="weui_uploader_hd weui_cell">问题图片:</div>
+                <div class="weui_uploader_bd">
+                    <?php if($issueInfo['image_url']){ ?>
+                    <ul class="weui_uploader_files">
+                        <?php foreach($issueInfo['image_url'] as $img){ ?>
+                        <li class="weui_uploader_file" style="background-image:url(<?php echo $img;?>);"></li>
+                        <?php } ?>
+                    </ul>
+                    <?php } ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php if($issueInfo['confirm_status'] == 0 && $belongTech){ ?>
+    <div class="weui-form-preview-ft">
+        <a id="confirmIssue" class="weui-form-preview-btn weui-form-preview-btn-primary" href="javascript:">确认预约</a>
+    </div>
+    <?php } ?>
+</div>
+</div>
+
+<div id="step2" class="hide">
+    <div class="weui_cells weui_cells_form ">
+        <div class="weui_cell">
+            <div class="weui_cell_hd"><label for="" class="weui_label">预约时间:</label></div>
+            <div class="weui_cell_bd weui_cell_primary">
+                <input class="weui_input" type="text" value="" id="serveTime" style="text-align:right;" readonly="">
+            </div>
+        </div>
+    </div>
+    <div class="weui_cells_tips">提交成功我们将会向提问者推送消息哦</div>
+    <div class="weui_btn_area">
+        <input type="hidden" id="issueID" value="<?=$issueInfo['id']?>" />
+        <a id="confirmIssueAgain" href="javascript:" class="weui_btn weui_btn_primary">提交</a>
+    </div>
+</div>
+
+<?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
+<script>
+$(document).ready(function(){
+    $("#serveTime").datetimePicker({title:"选择日期时间",min:'2015-12-10',max:'2050-10-01'});
+    $('#confirmIssue').click(function(){
+        $('#step1').addClass('hide');
+        $('#step2').removeClass('hide');
+    });
+    $('#confirmIssueAgain').click(function(){
+        var data = {};
+        data.serve_time = $('#serveTime').val();
+        if(empty(data.serve_time)){
+            $.toast('请填写预约时间');
+            return false;
+        }
+        data.id = $('#issueID').val();
+        $.showLoading();
+        $.ajax({
+            type: 'post',
+            url: '/issue/confirm',
+            dataType: 'json',
+            data: data,
+            success: function (data) {
+                $.hideLoading();
+                if(data.status){
+                    renderAjaxRespDiv({
+                        status: true,
+                        url: '/issue/detail/<?=$issueInfo['id']?>',
+                        urltext: '返回查看问题详情',
+                    });
+                } else {
+                    $.toast(data.msg);
+                }
+            }
+        });
+
+    });
+});
+</script>
