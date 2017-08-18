@@ -22,7 +22,7 @@
                 <?php } ?>
                     <?php if($issue['confirm_status'] == 1){ ?>
                         <span class="weui-badge success" style="position: absolute;top: -.4em;right: -.4em;">
-                        已确认
+                        <?php echo $issue['serve_no'];?>
                         </span>
                     <?php } else{ ?>
                         <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">

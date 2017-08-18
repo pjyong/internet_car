@@ -32,6 +32,12 @@ return [
             'appsecret' => 'd4624c36b6795d1d99dcf0547af5443d',
             'debug' => true,
             'logcallback' => 'logInfo'
-        )
+        ),
+        'qcloud' => array(
+            'SecretId'       => '你的secretId',
+            'SecretKey'      => '你的secretKey',
+            'RequestMethod'  => 'GET',
+            'DefaultRegion'  => '区域参数'
+        ),
     ],
 ];

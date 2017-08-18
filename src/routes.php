@@ -1,4 +1,6 @@
 <?php
+use Qcloud_video\Auth;
+use Qcloud_video\Video;
 // Routes
 /*
 $app->get('/[{name}]', function ($request, $response, $args) {
@@ -271,14 +273,25 @@ $app->get('/issue/fill', function ($request, $response, $args) {
 });
 
 // 保存问题
-$app->post('/issue/save', function ($request, $response, $args) {
+$app->post('/issue/save', function ($request, $response, $args)use($app) {
     checkAuth( $request );
     $data = array(
         'description' => $request->getParam('description'),
         'staff_id' => getCookie($request, 'id')
     );
+    logInfo( var_export( $request->getParam('image_url'), true ) );
     if(!empty($request->getParam('image_url'))){
-        $data['image_url'] = implode(',', $request->getParam('image_url'));
+        // 开始将所有mediaid存到本地来
+        require_once SRC_PATH . 'wechat-php-sdk/wechat.class.php';
+        $weObj = new Wechat( $app->getContainer()->get('settings')['wechat'] );
+        $allImagesMedias = $request->getParam('image_url');
+        $data['image_url'] = '';
+        foreach($allImagesMedias as $k => $mediaID){
+            $fileInfo = $weObj->getMedia($mediaID);
+            $returnFile = saveFile(date("dMYHis") . '_'.$k.'.jpg', $fileInfo);
+            $data['image_url'] .= ',' . $returnFile;
+        }
+        $data['image_url'] = trim($data['image_url'], ',');
     }
     insertIssue($data);
     return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
@@ -309,6 +322,18 @@ $app->get('/clear', function ($request, $response, $args) {
 
 // 测试
 $app->get('/test', function ($request, $response, $args) {
+    // 上传视频文件到微视频
+    $bucketName = 'abcde';
+    $remoteFolder = "/test/";
+    $srcPath = SRC_PATH . '../upload/ttt.mp4';
+    $dstPath = "/test.mp4";
+
+    Video::setTimeout(30);
+
+    $createFolderRet = Video::createFolder($bucketName, $remoteFolder);
+    var_dump($createFolderRet);
+    exit;
+
     return $response->withJson( array('id'=>1) );
 });
 

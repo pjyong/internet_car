@@ -246,3 +246,14 @@ function getShortTime( $d )
 {
     return date('m月d日H点左右', strtotime($d));
 }
+
+
+// 存储文件
+function saveFile( $fileName, $fileContent )
+{
+    $fp = fopen(SRC_PATH . '../upload/' . $fileName, 'w');
+    fwrite($fp, $fileContent);
+    fclose($fp);
+
+    return 'upload/' . $fileName;
+}

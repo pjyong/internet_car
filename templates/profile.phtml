@@ -46,9 +46,15 @@
     </div>
 <?php } ?>
 
+<?php if($hasPermissionToCreateIssue){ ?>
+    <div class="weui_btn_area">
+        <a href="/issue/fill" class="weui_btn weui_btn_primary">创建问题</a>
+    </div>
+<?php } ?>
+
 <?php if(!empty($issueList)){ ?>
 <div class="weui_panel weui_panel_access">
-    <div class="weui_panel_hd">近期问题</div>
+    <div class="weui_panel_hd"><?=$isMyProfile?'我的提问':'他的提问'?></div>
     <div class="weui_panel_bd">
         <?php foreach($issueList as $issue){ ?>
         <a href="/issue/detail/<?php echo $issue['id'];?>" class="weui_media_box weui_media_text weui_media_appmsg">
@@ -140,10 +146,6 @@ $(document).ready(function(){
 </script>
 <?php } ?>
 
-<?php if($hasPermissionToCreateIssue){ ?>
-    <div class="weui_btn_area">
-        <a href="/issue/fill" class="weui_btn weui_btn_primary">创建问题</a>
-    </div>
-<?php } ?>
+
 
 <?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
