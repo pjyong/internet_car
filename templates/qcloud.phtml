@@ -1,0 +1,27 @@
+<script src="//imgcache.qq.com/open/qcloud/js/vod/sdk/ugcUploader.js"></script>
+<script src="//imgcache.qq.com/open/qcloud/video/vcplayer/TcPlayer-2.2.0.js" charset="utf-8"></script>
+<script>
+// http://www.cnblogs.com/martianShu/p/6092915.html
+
+	var getSignature = function(callback){
+		$.ajax({
+			url: '/qcloud/signature',
+			data: JSON.stringify({
+				"Action":"GetVodSignatureV2"
+			}),
+			type: 'POST',
+			dataType: 'json',
+			success: function( data ){
+				if( data.status ) {
+					callback( data.signature );
+				} else {
+					$.toast( data.msg );
+				}
+
+			}
+		});
+	};
+
+
+
+</script>

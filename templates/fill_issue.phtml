@@ -1,5 +1,6 @@
 <?php require_once( TEMPLATE_PATH . './header.phtml' ); ?>
 <?php require_once( TEMPLATE_PATH . './wxjssdk.phtml' ); ?>
+<?php require_once( TEMPLATE_PATH . './qcloud.phtml' ); ?>
     <div class="weui_cells_title">问题描述</div>
     <div class="weui_cells weui_cells_form">
         <div class="weui_cell" id="descriptionWrapper">
@@ -16,16 +17,41 @@
                   <div class="weui_cell_ft js_counter">0/6</div>
                 </div>
                 <div class="weui_uploader_bd">
-                  <ul class="weui_uploader_files">
+                  <ul class="weui_uploader_files" id="weui_uploader_images">
                     <!-- 预览图插入到这 --> </ul>
-                  <div class="weui_uploader_input_wrp">
+                  <div class="weui_uploader_input_wrp upload_image_action">
                     <a id="chooseImageBtn" class="weui_uploader_input js_file"></a></div>
                 </div>
               </div>
             </div>
         </div>
+
+        <div class="weui_cell">
+            <div class="weui_cell_bd weui_cell_primary">
+              <div class="weui_uploader">
+                <div class="weui_uploader_hd weui_cell">
+                  <div class="weui_cell_bd weui_cell_primary">视频上传</div>
+                </div>
+                <div class="weui_uploader_bd">
+                  <ul class="weui_uploader_files">
+
+                      <div id="insert_video" style="width:100%; height:auto;"></div>
+
+                    </ul>
+                  <div class="weui_uploader_input_wrp">
+                      <form id="form1">
+                    	<input id="chooseVideoInput" type="file" style="display:none;">
+                    </form>
+                    <a id="chooseVideoBtn" class="weui_uploader_input js_file"></a></div>
+                </div>
+              </div>
+            </div>
+        </div>
     </div>
+
     <div class="weui_btn_area">
+        <input id="field_id" type="hidden" value="" />
+        <input id="video_url" type="hidden" value="" />
         <a class="weui_btn weui_btn_primary" href="javascript:" id="saveIssueInfo">确定</a>
     </div>
 <?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
@@ -81,6 +107,82 @@ $(function(){
     });
 
 
+
+    $('#chooseVideoBtn').click(function(){
+        $('#chooseVideoInput').trigger('click');
+    });
+
+    // 上传视频相关
+    $('#chooseVideoInput').on('change', function (e) {
+		var videoFile = this.files[0];
+        $.showLoading();
+        var toastContent = $('.weui_toast_content');
+        toastContent.text('已上传0%...');
+		var resultMsg = qcVideo.ugcUploader.start({
+    		videoFile: videoFile,
+    		getSignature: getSignature,
+    		allowAudio: 1,
+            isTranscode: 1,
+    		success: function(result){
+    			if(result.type == 'video') {
+    			} else if (result.type == 'cover') {
+    			}
+    		},
+    		error: function(result){
+    			if(result.type == 'video') {
+                    $.toast('上传失败');
+    			} else if (result.type == 'cover') {
+    			}
+    		},
+    		progress: function(result){
+    			if(result.type == 'video') {
+                    toastContent.text('已上传'+Math.floor(result.shacurr*100)+'%...');
+    			} else if (result.type == 'cover') {
+    			}
+    		},
+    		finish: function(result){
+    			$('#field_id').val(result.fileId);
+    			$('#video_url').val(result.videoUrl);
+                toastContent.text('视频转码中...');
+                $.ajax({
+                    type: 'post',
+                    url: '/video/convert',
+                    dataType: 'json',
+                    data: {
+                        file_id: result.fileId,
+                    },
+                    success: function (data) {
+                        alert('start Loop');
+                        // 开始轮询
+                        var it = setInterval(function(){
+                            $.ajax({
+                                type: 'get',
+                                url: '/video/detail/' + result.fileId,
+                                dataType: 'json',
+                                success: function (data) {
+                                    if(data.data.transcode_status == 1){
+                                        $.hideLoading();
+                                        clearInterval(it);
+                                        $('#chooseVideoBtn').addClass('hide');
+                                        var player = new TcPlayer('insert_video', {
+                                            "mp4": "http://1254184663.vod2.myqcloud.com/2871276fvodtransgzp1254184663/ee4b03679031868223143626918/v.f20.mp4", //请替换成实际可用的播放地址
+                                            "autoplay" : true,      //iOS下safari浏览器，以及大部分移动端浏览器是不开放视频自动播放这个能力的
+                                            "coverpic" : "http://1254184663.vod2.myqcloud.com/2871276fvodtransgzp1254184663/eea5ec819031868223143677213/snapshot/1503255737_4170572668.100_0.jpg",
+                                            "width" :  '480',//视频的显示宽度，请尽量使用视频分辨率宽度
+                                            "height" : '320'//视频的显示高度，请尽量使用视频分辨率高度
+                                        });
+                                    }
+                                }
+                            });
+                        }, 3000);
+                    }
+                });
+
+    		}
+		});
+		$('#form1')[0].reset();
+	});
+
 });
 wx.ready(function(){
     $('#chooseImageBtn').click(function(){
@@ -119,11 +221,11 @@ function uploadImage( localIds )
                 success: function (res) {
                     var localData = res.localData; // localData是图片的base64数据，可以用img标签显示
                     var $preview = $('<li class="weui_uploader_file" data-url="'+serverId+'" style="background-image:url(' + localData + ')"></li>');
-                    $('.weui_uploader_files').append($preview);
+                    $('#weui_uploader_images').append($preview);
                     var num = $('.weui_uploader_file').length;
                     $('.js_counter').html(num + '/6');
                     if( num >= 6 ){
-                        $('.weui_uploader_input_wrp').addClass('hide');
+                        $('.upload_image_action').addClass('hide');
                     }
                 }
             });

@@ -257,3 +257,56 @@ function saveFile( $fileName, $fileContent )
 
     return 'upload/' . $fileName;
 }
+
+// 生成签名2
+function generateSignatureV2( $srcStr ){
+    $secretKey = 'jKjwzrX5SddR7c0CFmDTkp9L0WCat0ve';
+    $signStr = base64_encode(hash_hmac('sha1', $srcStr, $secretKey, true));
+    return $signStr;
+}
+
+// 插入视频
+function insertVideo( $videoInfo )
+{
+    global $db;
+    $db->insert( 'video', $videoInfo );
+    return $db->lastInsertId();
+}
+
+function updateVideo( $videoInfo, $fileID )
+{
+    global $db;
+    $db->update( 'video', $videoInfo, array('file_id'=>$fileID) );
+}
+
+function getVideo( $fileID ){
+    global $db;
+    $videoInfo = $db->fetchAssoc( 'SELECT * FROM video WHERE file_id = ?', array($fileID) );
+
+    return $videoInfo;
+}
+
+// 生成签名
+function generateSignature( $time )
+{
+    // 确定APP的云API密钥
+    $secret_id = "AKIDhIhzAACe6NVVKAbVwBE5kDTZTBlAmYTB";
+    $secret_key = "jKjwzrX5SddR7c0CFmDTkp9L0WCat0ve";
+
+    // 确定签名的当前时间和失效时间
+    $current = $time;
+    $expired = $current + 86400;  // 签名有效期：1天
+
+    // 向参数列表填入参数
+    $arg_list = array(
+        "secretId" => $secret_id,
+        "currentTimeStamp" => $current,
+        "expireTime" => $expired,
+        "random" => rand());
+
+    // 计算签名
+    $orignal = http_build_query($arg_list);
+    $signature = base64_encode(hash_hmac('SHA1', $orignal, $secret_key, true).$orignal);
+
+    return $signature;
+}

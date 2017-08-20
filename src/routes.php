@@ -322,19 +322,74 @@ $app->get('/clear', function ($request, $response, $args) {
 
 // 测试
 $app->get('/test', function ($request, $response, $args) {
-    // 上传视频文件到微视频
-    $bucketName = 'abcde';
-    $remoteFolder = "/test/";
-    $srcPath = SRC_PATH . '../upload/ttt.mp4';
-    $dstPath = "/test.mp4";
 
-    Video::setTimeout(30);
+    return $this->renderer->render($response, 'qcloud.phtml', array(
+    ));
+});
 
-    $createFolderRet = Video::createFolder($bucketName, $remoteFolder);
-    var_dump($createFolderRet);
+// 发送视频转码请求
+$app->post('/video/convert', function ($request, $response, $args) {
+    checkAuth( $request );
+
+    $fileID = $request->getParam('file_id');
+    $params = array(
+        'Action' => 'ConvertVodFile',
+        'SignatureMethod' => 'HmacSHA1',
+        'fileId' => $fileID,
+        'isWatermark' => 1,
+        'isScreenshot' => 1,
+        'SecretId' => 'AKIDhIhzAACe6NVVKAbVwBE5kDTZTBlAmYTB',
+        'Timestamp' => time(),
+        'Nonce' => rand(),
+    );
+    insertVideo( array(
+        'file_id' => $fileID
+    ) );
+    ksort($params);
+    $remoteUrl = 'GETvod.api.qcloud.com/v2/index.php?'.http_build_query($params);
+    $signature = generateSignatureV2($remoteUrl);
+    $remoteUrl = 'https://vod.api.qcloud.com/v2/index.php?'.http_build_query($params).'&Signature=' . $signature;
+    $ch=curl_init();
+    curl_setopt($ch,CURLOPT_URL,$remoteUrl);
+    curl_setopt($ch,CURLOPT_HEADER,0);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,0);
+
+    $data = curl_exec($ch);
+    curl_close($ch);
     exit;
 
-    return $response->withJson( array('id'=>1) );
+});
+
+// 客户端轮询是否转码完成
+$app->get('/video/detail/{fileid}', function ($request, $response, $args) {
+    $fileID = $args['fileid'];
+    $info = getVideo( $fileID );
+
+    return $response->withJson( array('status' => true, 'msg' => '', 'data' => $info ) );
+});
+
+// 接收来自腾讯视频转码完成的通知
+$app->post('/video/transcode/notification', function ($request, $response, $args) {
+    logInfo(var_export( $request->getParams(), true ));
+    // 检查是不是转码完成
+    if($request->getParam('eventType') != 'TranscodeComplete'){
+        exit;
+    }
+    $data = $request->getParam('data');
+    if($data['status'] == 0){
+        // 转码完成
+        updateVideo(array('transcode_status' => 1 ,
+            'cover_url' => $data['coverUrl']
+        ), $data['fileId']);
+    }
+    exit;
+});
+
+// 获取qcloud的签名
+$app->post('/qcloud/signature', function ($request, $response, $args) {
+    checkAuth( $request );
+
+    return $response->withJson( array('status' => true, 'msg' => '', 'signature' => generateSignature(time()) ) );
 });
 
 // 所有的错误页面
