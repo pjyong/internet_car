@@ -3,17 +3,14 @@
 use Dflydev\FigCookies\FigRequestCookies;
 use Dflydev\FigCookies\FigResponseCookies;
 use Dflydev\FigCookies\SetCookie as SetCookieObj;
-
 $db = $container->db;
-
-// $cookies = Dflydev\FigCookies\Cookies::fromRequest($request);
 function getCookie( $request, $cookieName ){
     return FigRequestCookies::get($request, $cookieName)->getValue();
 }
 
-function setCookieByName($response, $name, $value){
+function setCookieByName($response, $name, $value, $period = 7200){
     $response = FigResponseCookies::set( $response,
-        SetCookieObj::create($name)->withValue($value)->withPath('/')->rememberForever()
+        SetCookieObj::create($name)->withValue($value)->withPath('/')->withExpires( new \DateTime('+2 hours') )
     );
     return $response;
 }
@@ -26,6 +23,7 @@ function getAbsoluteUrl( $extra )
 
 function checkAuth( $request ){
     $host  = $_SERVER['HTTP_HOST'];
+    logInfo( '###' . getCookie($request, 'id') . '验证中...' );
     if( !getCookie($request, 'id') ){
         // 获取当前页面
         $returnUrl = urlencode( 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] );
@@ -33,9 +31,15 @@ function checkAuth( $request ){
         exit;
     }
 
-    // 检查这个用户的状态
+    // // 检查这个用户的状态
     $currentID = getCookie($request, 'id');
     $currentInfo = getStaffInfoByID( $currentID );
+    // // 检查这个用户是否关注
+    // if($currentInfo['subscribe'] == 0){
+    //     header("Location: http://$host/clear");
+    //     exit;
+    // }
+
     if($currentInfo['status'] == 0 && $_SERVER["REQUEST_URI"] != '/profile/fill'
         &&  $_SERVER["REQUEST_URI"] !='/profile/save'){
         header("Location: http://$host/profile/fill");
@@ -91,6 +95,15 @@ function getStaffListByStatus( $status )
     return $staffList;
 }
 
+function getStaffListByDepa( $depaID )
+{
+    global $db;
+    $staffList = $db->fetchAll( 'SELECT * FROM staff WHERE department = ? and status= 2', array($depaID) );
+
+    return $staffList;
+}
+
+
 function insertStaff( $info )
 {
     global $db;
@@ -104,6 +117,20 @@ function insertIssue( $info )
     $info['create_time'] = date('Y-m-d H:i:s');
     $db->insert( 'issue', $info );
     return $db->lastInsertId();
+}
+
+function unsubscribeStaff( $openID )
+{
+    global $db;
+    $info['subscribe'] = 0;
+    $info['unsubscribe_time'] = date('Y-m-d H:i:s');
+    $db->update( 'staff', $info, array('open_id'=>$openID) );
+}
+
+function saveStaffInfoByOpenID( $info, $openID )
+{
+    global $db;
+    $db->update( 'staff', $info, array('open_id'=>$openID) );
 }
 
 // 保存用户资料
@@ -321,4 +348,37 @@ function generateSignature( $time )
     $signature = base64_encode(hash_hmac('SHA1', $orignal, $secret_key, true).$orignal);
 
     return $signature;
+}
+
+// 向所有技术员发通知
+// issueID, fromUserID
+function sendIssueCreatedNotificationToDepa( $data )
+{
+    global $app;
+    require_once SRC_PATH . 'wechat-php-sdk/wechat.class.php';
+    $weObj = new Wechat( $app->getContainer()->get('settings')['wechat'] );
+    // 获取所有已关注的技术人员
+    $fromUserInfo = getStaffInfoByID();
+    $allStaffs = getStaffListByDepa(1);
+    foreach($allStaffs as $staff){
+        $weObj->sendTemplateMessage(array(
+            'touser' => $staff['open_id'],
+            'template_id' => 'QR2oLdUdq06oyZQGWpAVZ0pyr61XJTY26jegWdu6hxc',
+            'url' => getAbsoluteUrl('issue/detail/' . $data['issueID']),
+            "topcolor":"#FF0000",
+            "data":{
+				"name": {
+					"value":"参数",
+					"color":"#173177"	 //参数颜色
+				}
+			}
+
+        ));
+    }
+}
+
+// 指定某个人发通知
+function sendNotificationToStaff()
+{
+
 }

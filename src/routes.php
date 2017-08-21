@@ -1,35 +1,9 @@
 <?php
 use Qcloud_video\Auth;
 use Qcloud_video\Video;
-// Routes
-/*
-$app->get('/[{name}]', function ($request, $response, $args) {
-    // Sample log message
-    $this->logger->info("Slim-Skeleton '/' route");
 
-    // Render index view
-    return $this->renderer->render($response, 'index.phtml', $args);
-});
-*/
-
-
-/*
-
-
-
-
-*/
-
-//
 $app->get('/', function ($request, $response, $args) {
-    // 检查该用户是否填写资料
-    $staffID = 1;
-    $staffInfo = getNewServeNO( );
-    print_r( $staffInfo );
-    return;
-
-    // Render index view
-    return $this->renderer->render($response, 'index.phtml', $args);
+    echo 'no access';exit;
 });
 
 // 通过openID获取用户信息
@@ -58,7 +32,6 @@ $app->post('/entrance', function ($request, $response, $args) use($app) {
 			$weObj->text("这只是个自动回复")->reply();
 			break;
     	case Wechat::MSGTYPE_EVENT:
-            // 关注事件都是从这里开始的
             $event = $weObj->getRev()->getRevEvent();
             switch ($event['event']) {
                 case Wechat::EVENT_SUBSCRIBE :
@@ -76,11 +49,32 @@ $app->post('/entrance', function ($request, $response, $args) use($app) {
                         );
                         $staffID = insertStaff( $staffInfo );
                         $this->logger->info( '刚刚有成员ID为'.$staffID.'的同学关注了' );
-                        // Todo::推送一个模板消息提示告诉用户完善资料
-                        $weObj->text("http://partner.cheyuu.com/profile")->reply();
+                        $weObj->news( array(
+                            array(
+                                'Title' => '欢迎关注',
+                                'Description' => '为了更好地帮您解决问题,请完善个人资料',
+                                'PicUrl' => 'http://partner.cheyuu.com/assets/images/clickme.png',
+                                'Url' => 'http://partner.cheyuu.com/profile',
+                            ),
+                        ) )->reply();
+                    } else {
+                        // 将关注状态改为1
+                        saveStaffInfoByOpenID( array(
+                            'subscribe' => 1,
+                        ), $openID );
+                        $weObj->news( array(
+                            array(
+                                'Title' => '欢迎回来',
+                                'Description' => '快速进入个人主页,寻求帮助吧',
+                                'PicUrl' => 'http://partner.cheyuu.com/assets/images/clickme.png',
+                                'Url' => 'http://partner.cheyuu.com/profile',
+                            ),
+                        ) )->reply();
                     }
                     break;
                 case Wechat::EVENT_UNSUBSCRIBE :
+                    // 取消关注
+                    unsubscribeStaff($weObj->getRevFrom());
                 break;
             }
     		break;
@@ -106,7 +100,6 @@ $app->get('/oauth', function ($request, $response, $args) use( $app ) {
     if ( $openID ) {													// openID 存在
         if ( !getCookie( $request, 'id') ){
             // 设置用户id
-            // 通过openID获取id
             $staffID = getStaffIDByOpenID($openID);
             $response = setCookieByName($response, 'id', $staffID );
             return $response->withHeader('Location', $returnUrl);
@@ -137,6 +130,7 @@ $app->get('/oauth', function ($request, $response, $args) use( $app ) {
             );
             $staffID = insertStaff( $staffInfo );
         }
+        $response = setCookieByName($response, 'openid', $oauth["openid"] );
         $response = setCookieByName($response, 'id', $staffID );
     }
     return $response->withHeader('Location', $returnUrl);
@@ -240,7 +234,7 @@ $app->get('/issue/detail/{id}', function ($request, $response, $args) {
         return $response->withHeader('Location', '/error');
     }
     $issueStaffInfo = getStaffInfoByID($issueInfo['staff_id']);
-    
+
     return $this->renderer->render($response, 'issue_detail.phtml', array(
         'issueInfo' => $issueInfo,
         'issueStaffInfo' => $issueStaffInfo,
@@ -294,7 +288,12 @@ $app->post('/issue/save', function ($request, $response, $args)use($app) {
         }
         $data['image_url'] = trim($data['image_url'], ',');
     }
-    insertIssue($data);
+    $newIssueID = insertIssue($data);
+    /*
+
+    
+    */
+
     return $response->withJson( array('status'=>true, 'msg'=>'操作成功') );
 });
 
@@ -316,8 +315,7 @@ $app->get('/staffs/status/{status}', function ($request, $response, $args) {
 $app->get('/clear', function ($request, $response, $args) {
     $response = setCookieByName( $response, 'id', 0);
     $response = setCookieByName( $response, 'openid', '');
-    return $this->renderer->render($response, 'error.phtml', array(
-    ));
+    return $response->withHeader('Location', '/profile');
 });
 
 
