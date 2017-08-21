@@ -219,6 +219,11 @@ function getIssueDetail( $id )
         $issueInfo['image_url'] = $images;
     }
 
+    // 获取视频信息
+    if($issueInfo['video_id']){
+        $issueInfo['videoInfo'] = getVideoByID( $issueInfo['video_id'] );
+    }
+
     return $issueInfo;
 }
 
@@ -282,7 +287,14 @@ function updateVideo( $videoInfo, $fileID )
 function getVideo( $fileID ){
     global $db;
     $videoInfo = $db->fetchAssoc( 'SELECT * FROM video WHERE file_id = ?', array($fileID) );
+    $videoInfo['source'] = unserialize($videoInfo['source']);
+    return $videoInfo;
+}
 
+function getVideoByID( $id ){
+    global $db;
+    $videoInfo = $db->fetchAssoc( 'SELECT * FROM video WHERE id = ?', array($id) );
+    $videoInfo['source'] = unserialize($videoInfo['source']);
     return $videoInfo;
 }
 

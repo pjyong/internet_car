@@ -240,7 +240,7 @@ $app->get('/issue/detail/{id}', function ($request, $response, $args) {
         return $response->withHeader('Location', '/error');
     }
     $issueStaffInfo = getStaffInfoByID($issueInfo['staff_id']);
-
+    
     return $this->renderer->render($response, 'issue_detail.phtml', array(
         'issueInfo' => $issueInfo,
         'issueStaffInfo' => $issueStaffInfo,
@@ -277,7 +277,8 @@ $app->post('/issue/save', function ($request, $response, $args)use($app) {
     checkAuth( $request );
     $data = array(
         'description' => $request->getParam('description'),
-        'staff_id' => getCookie($request, 'id')
+        'staff_id' => getCookie($request, 'id'),
+        'video_id' => $request->getParam('video_id')
     );
     logInfo( var_export( $request->getParam('image_url'), true ) );
     if(!empty($request->getParam('image_url'))){
@@ -377,9 +378,9 @@ $app->post('/video/transcode/notification', function ($request, $response, $args
     }
     $data = $request->getParam('data');
     if($data['status'] == 0){
-        // 转码完成
         updateVideo(array('transcode_status' => 1 ,
-            'cover_url' => $data['coverUrl']
+            'cover_url' => $data['coverUrl'],
+            'source' => serialize($data['playSet']),
         ), $data['fileId']);
     }
     exit;

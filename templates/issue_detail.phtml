@@ -1,4 +1,6 @@
 <?php require_once( TEMPLATE_PATH . './header.phtml' ); ?>
+<?php require_once( TEMPLATE_PATH . './wxjssdk.phtml' ); ?>
+<?php require_once( TEMPLATE_PATH . './qcloud.phtml' ); ?>
 
 <div id="step1">
 <div class="weui-form-preview">
@@ -37,12 +39,26 @@
                     <?php if($issueInfo['image_url']){ ?>
                     <ul class="weui_uploader_files">
                         <?php foreach($issueInfo['image_url'] as $img){ ?>
-                        <li class="weui_uploader_file" style="background-image:url(<?php echo $img;?>);"></li>
+                        <li data-href="<?php echo $img;?>"  class="weui_uploader_file wxpreview" style="background-image:url(<?php echo $img;?>);"></li>
                         <?php } ?>
                     </ul>
                     <?php } ?>
                 </div>
             </div>
+        </div>
+
+        <div class="weui_cell_bd weui_cell_primary">
+          <div class="weui_uploader">
+            <div class="weui_uploader_hd weui_cell">视频:
+            </div>
+            <div class="weui_uploader_bd">
+              <ul class="weui_uploader_files" id="weui_uploader_videos">
+
+
+
+                </ul>
+            </div>
+          </div>
         </div>
     </div>
     <?php if($issueInfo['confirm_status'] == 0 && $belongTech){ ?>
@@ -71,7 +87,49 @@
 
 <?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
 <script>
+
+
 $(document).ready(function(){
+    $('.wxpreview').click(function(){
+        var urls = [];
+        $('.wxpreview').each(function(){
+            urls.push($(this).data('href'));
+        });
+        var current = $(this).data('href');
+        wx.ready(function(){
+            wx.previewImage({
+                current: current, // 当前显示图片的http链接
+                urls: urls // 需要预览的图片http链接列表
+            });
+        });
+        return false;
+    });
+
+    // 加载视频信息
+    <?php
+        if(isset( $issueInfo['videoInfo']['source'] ) && !empty( isset( $issueInfo['videoInfo']['source'] ) ) ){
+            foreach($issueInfo['videoInfo']['source'] as $k => $item){
+                if($item['definition'] != 20){continue;}
+    ?>
+    $('#weui_uploader_videos').append('<div id="insert_video_<?=$k?>"  class="insert_video" style="width:100%; height:auto;margin-bottom:15px;"></div>');
+    var player = new TcPlayer('insert_video_<?=$k?>', {
+        "mp4": "<?=$item['url']?>", //请替换成实际可用的播放地址
+        "autoplay" : false,      //iOS下safari浏览器，以及大部分移动端浏览器是不开放视频自动播放这个能力的
+        "coverpic" : {
+            'src': "<?=$issueInfo['videoInfo']['cover_url']?>",
+            'style': 'cover',
+        },
+        "width" :  $('body').width()-30,//视频的显示宽度，请尽量使用视频分辨率宽度
+        "height" : parseInt(<?=$item['vheight']/$item['vwidth']?>*($('body').width()-30))//视频的显示高度，请尽量使用视频分辨率高度
+    });
+    <?php
+            }
+        }else{
+    ?>
+
+    <?php
+        }
+    ?>
     $("#serveTime").datetimePicker({title:"选择日期时间",min:'2015-12-10',max:'2050-10-01'});
     $('#confirmIssue').click(function(){
         $('#step1').addClass('hide');

@@ -33,12 +33,9 @@
                   <div class="weui_cell_bd weui_cell_primary">视频上传</div>
                 </div>
                 <div class="weui_uploader_bd">
-                  <ul class="weui_uploader_files">
-
-                      <div id="insert_video" style="width:100%; height:auto;"></div>
-
+                  <ul class="weui_uploader_files" id="weui_uploader_videos">
                     </ul>
-                  <div class="weui_uploader_input_wrp">
+                  <div class="weui_uploader_input_wrp upload_video_action">
                       <form id="form1">
                     	<input id="chooseVideoInput" type="file" style="display:none;">
                     </form>
@@ -50,8 +47,7 @@
     </div>
 
     <div class="weui_btn_area">
-        <input id="field_id" type="hidden" value="" />
-        <input id="video_url" type="hidden" value="" />
+        <input id="video_id" type="hidden" value="" />
         <a class="weui_btn weui_btn_primary" href="javascript:" id="saveIssueInfo">确定</a>
     </div>
 <?php require_once( TEMPLATE_PATH . './footer.phtml' ); ?>
@@ -74,6 +70,7 @@ $(function(){
         var data = {};
         data.description = $.trim( $('#description').val() );
         data.image_url = [];
+        data.video_id = $('#video_id').val();
         $('.weui_uploader_file').each(function(){
             data.image_url.push($(this).data('url'));
         });
@@ -105,8 +102,6 @@ $(function(){
             }
         });
     });
-
-
 
     $('#chooseVideoBtn').click(function(){
         $('#chooseVideoInput').trigger('click');
@@ -141,8 +136,6 @@ $(function(){
     			}
     		},
     		finish: function(result){
-    			$('#field_id').val(result.fileId);
-    			$('#video_url').val(result.videoUrl);
                 toastContent.text('视频转码中...');
                 $.ajax({
                     type: 'post',
@@ -152,7 +145,6 @@ $(function(){
                         file_id: result.fileId,
                     },
                     success: function (data) {
-                        alert('start Loop');
                         // 开始轮询
                         var it = setInterval(function(){
                             $.ajax({
@@ -163,18 +155,28 @@ $(function(){
                                     if(data.data.transcode_status == 1){
                                         $.hideLoading();
                                         clearInterval(it);
-                                        $('#chooseVideoBtn').addClass('hide');
-                                        var player = new TcPlayer('insert_video', {
-                                            "mp4": "http://1254184663.vod2.myqcloud.com/2871276fvodtransgzp1254184663/ee4b03679031868223143626918/v.f20.mp4", //请替换成实际可用的播放地址
-                                            "autoplay" : true,      //iOS下safari浏览器，以及大部分移动端浏览器是不开放视频自动播放这个能力的
-                                            "coverpic" : "http://1254184663.vod2.myqcloud.com/2871276fvodtransgzp1254184663/eea5ec819031868223143677213/snapshot/1503255737_4170572668.100_0.jpg",
-                                            "width" :  '480',//视频的显示宽度，请尽量使用视频分辨率宽度
-                                            "height" : '320'//视频的显示高度，请尽量使用视频分辨率高度
-                                        });
+                                        $('.upload_video_action').addClass('hide');
+                                        if(data.data.source.length > 0){
+                                            for(var vk in data.data.source){
+                                                if(parseInt(data.data.source[vk]['definition']) != 20){continue;}
+                                                $('#weui_uploader_videos').append('<div id="insert_video_'+vk+'"  class="insert_video" style="width:100%; height:auto;margin-bottom:15px;"></div>');
+                                                var player = new TcPlayer('insert_video_'+vk, {
+                                                    "mp4": data.data.source[vk]['url'], //请替换成实际可用的播放地址
+                                                    "autoplay" : false,      //iOS下safari浏览器，以及大部分移动端浏览器是不开放视频自动播放这个能力的
+                                                    "coverpic" : {
+                                                        'src': data.data.cover_url,
+                                                        'style': 'cover',
+                                                    },
+                                                    "width" :  $('body').width()-30,//视频的显示宽度，请尽量使用视频分辨率宽度
+                                                    "height" : parseInt( (data.data.source[vk]['vheight']/data.data.source[vk]['vwidth'])*($('body').width()-30) )//视频的显示高度，请尽量使用视频分辨率高度
+                                                });
+                                            }
+                                        }
+                                        $('#video_id').val(data.data.id);
                                     }
                                 }
                             });
-                        }, 3000);
+                        }, 2000);
                     }
                 });
 
@@ -183,26 +185,47 @@ $(function(){
 		$('#form1')[0].reset();
 	});
 
-});
-wx.ready(function(){
+
+
     $('#chooseImageBtn').click(function(){
         var num = $('.weui_uploader_file').length;
         if(num >= 6){
             $.toast('您最多只能上传6张图片');
             return false;
         }
-        wx.chooseImage({
-            count: 6-num, // 默认9
-            sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
-            sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
-            success: function (res) {
-                var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
-                uploadImage(localIds);
-            }
+        wx.ready(function(){
+            wx.chooseImage({
+                count: 6-num, // 默认9
+                sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+                sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+                success: function (res) {
+                    var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+                    setTimeout(function(){
+                        uploadImage(localIds);
+                    }, 100);
+                }
+            });
         });
         return false;
+
     });
+
 });
+
+
+function showWxPreview( obj )
+{
+    var urls = [];
+    $('.wxpreview').each(function(){
+        urls.push($(this).data('src'));
+    });
+    var current = $(obj).data('src');
+    wx.previewImage({
+        current: current, // 当前显示图片的http链接
+        urls: urls // 需要预览的图片http链接列表
+    });
+    return false;
+}
 
 // 微信不能同时上传多张图片,只能一个接一个上传
 function uploadImage( localIds )
@@ -210,6 +233,7 @@ function uploadImage( localIds )
     if(localIds.length == 0){
         return false;
     }
+
     wx.uploadImage({
         localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
         isShowProgressTips: 1, // 默认为1，显示进度提示
@@ -220,7 +244,7 @@ function uploadImage( localIds )
                 localId: localIds[0], // 图片的localID
                 success: function (res) {
                     var localData = res.localData; // localData是图片的base64数据，可以用img标签显示
-                    var $preview = $('<li class="weui_uploader_file" data-url="'+serverId+'" style="background-image:url(' + localData + ')"></li>');
+                    var $preview = $('<li class="weui_uploader_file wxpreview" data-src="'+localData+'" onclick="return showWxPreview(this);" data-url="'+serverId+'" style="background-image:url(' + localData + ')"></li>');
                     $('#weui_uploader_images').append($preview);
                     var num = $('.weui_uploader_file').length;
                     $('.js_counter').html(num + '/6');

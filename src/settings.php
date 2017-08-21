@@ -33,11 +33,5 @@ return [
             'debug' => true,
             'logcallback' => 'logInfo'
         ),
-        'qcloud' => array(
-            'SecretId'       => '你的secretId',
-            'SecretKey'      => '你的secretKey',
-            'RequestMethod'  => 'GET',
-            'DefaultRegion'  => '区域参数'
-        ),
     ],
 ];
