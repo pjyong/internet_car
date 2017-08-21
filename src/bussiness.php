@@ -98,7 +98,7 @@ function getStaffListByStatus( $status )
 function getStaffListByDepa( $depaID )
 {
     global $db;
-    $staffList = $db->fetchAll( 'SELECT * FROM staff WHERE department = ? and status= 2', array($depaID) );
+    $staffList = $db->fetchAll( 'SELECT * FROM staff WHERE department = ? and status= 2 AND id = 7', array($depaID) );
 
     return $staffList;
 }
@@ -368,7 +368,7 @@ function sendIssueCreatedNotificationToDepa( $data )
             "topcolor":"#FF0000",
             "data":{
 				"name": {
-					"value":"参数",
+					"value": $staff['name'],
 					"color":"#173177"	 //参数颜色
 				}
 			}
