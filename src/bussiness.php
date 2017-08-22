@@ -98,7 +98,7 @@ function getStaffListByStatus( $status )
 function getStaffListByDepa( $depaID )
 {
     global $db;
-    $staffList = $db->fetchAll( 'SELECT * FROM staff WHERE department = ? and status= 2 AND id = 7', array($depaID) );
+    $staffList = $db->fetchAll( 'SELECT * FROM staff WHERE department = ? and status= 2 ', array($depaID) );
 
     return $staffList;
 }
@@ -217,7 +217,7 @@ function getIssueListByStaffID( $staffID ){
 function getIssueListByStatus( $confirmStatus )
 {
     global $db;
-    $allIssues = $db->fetchAll( 'SELECT * FROM issue WHERE confirm_status = ? order by id desc', array( $confirmStatus ) );
+    $allIssues = $db->fetchAll( 'SELECT * FROM issue WHERE confirm_status = ? order by serve_no asc, id desc ', array( $confirmStatus ) );
     if($allIssues){
         foreach($allIssues as $k => $v){
             if($v['image_url']){
@@ -227,6 +227,9 @@ function getIssueListByStatus( $confirmStatus )
                 }
                 $allIssues[$k]['image_url'] = $images;
             }
+
+            // 顺便将人的信息也放进来
+            $allIssues[$k]['staffInfo'] = getStaffInfoByID( $v['staff_id'] );
         }
     }
 
@@ -276,7 +279,7 @@ function saveToImage( $data, $fileType = 'image/jpeg' ){
 // 提取出时间
 function getShortTime( $d )
 {
-    return date('m月d日H点左右', strtotime($d));
+    return date('m-d H:i', strtotime($d));
 }
 
 
@@ -358,27 +361,33 @@ function sendIssueCreatedNotificationToDepa( $data )
     require_once SRC_PATH . 'wechat-php-sdk/wechat.class.php';
     $weObj = new Wechat( $app->getContainer()->get('settings')['wechat'] );
     // 获取所有已关注的技术人员
-    $fromUserInfo = getStaffInfoByID();
+    $fromUserInfo = getStaffInfoByID( $data['fromUserID'] );
     $allStaffs = getStaffListByDepa(1);
     foreach($allStaffs as $staff){
         $weObj->sendTemplateMessage(array(
             'touser' => $staff['open_id'],
             'template_id' => 'QR2oLdUdq06oyZQGWpAVZ0pyr61XJTY26jegWdu6hxc',
             'url' => getAbsoluteUrl('issue/detail/' . $data['issueID']),
-            "topcolor":"#FF0000",
-            "data":{
-				"name": {
-					"value": $staff['name'],
-					"color":"#173177"	 //参数颜色
-				}
-			}
+            "topcolor" => "#FF0000",
+            "data" => array(
+				"name" => array(
+					"value" => $staff['name'],
+					"color" => "#173177"	 //参数颜色
+				)
+			)
 
         ));
     }
 }
 
 // 指定某个人发通知
-function sendNotificationToStaff()
+function sendNotificationToStaff( $data )
 {
 
+}
+
+// 格式化预约号
+function formatServeNO( $serveNO )
+{
+    return sprintf("%'.04d\n", $serveNO);
 }

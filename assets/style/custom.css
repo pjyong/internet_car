@@ -123,3 +123,14 @@ body {
 .weui-badge.success{
   background-color:#04be02;
   }
+
+  .no_padding{
+      padding:0px;
+  }
+
+  .no_border{
+      border:none;
+  }
+  .no_border:before{
+      border:none;
+  }

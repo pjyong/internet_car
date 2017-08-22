@@ -20,8 +20,27 @@
                         <img class="weui_media_appmsg_thumb" src="<?=$staff['headimgurl']?>" alt="">
                     </div>
                     <div class="weui_media_bd">
-                        <h4 class="weui_media_title"><?=$staff['name']?></h4>
-                        <p class="weui_media_desc">门牌号:<?=$staff['room']?></p>
+                        <!-- <h4 class="weui_media_title"></h4>
+                        <p class="weui_media_desc"></p>
+                        <p class="weui_media_desc"></p> -->
+                        <div class="weui_cell no_padding no_border">
+                            <div class="weui_cell_bd weui_cell_primary">
+                                <p>姓名</p>
+                            </div>
+                            <div class="weui_cell_ft"><?=$staff['name']?></div>
+                        </div>
+                        <div class="weui_cell no_padding no_border">
+                            <div class="weui_cell_bd weui_cell_primary">
+                                <p>房间号</p>
+                            </div>
+                            <div class="weui_cell_ft"><?=$staff['room']?></div>
+                        </div>
+                        <div class="weui_cell no_padding no_border">
+                            <div class="weui_cell_bd weui_cell_primary">
+                                <p>手机</p>
+                            </div>
+                            <div class="weui_cell_ft"><?=$staff['phone']?></div>
+                        </div>
                     </div>
                 </a>
                 <?php } ?>

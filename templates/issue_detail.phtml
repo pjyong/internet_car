@@ -12,7 +12,7 @@
         <?php if($issueInfo['confirm_status'] == 1){ ?>
             <p>
                 <label class="weui-form-preview-label f-green">预约号:</label>
-                <span class="weui-form-preview-value f31 f-green"><?php echo $issueInfo['serve_no']; ?></span>
+                <span class="weui-form-preview-value f31 f-green"><?php echo formatServeNO( $issueInfo['serve_no'] ); ?></span>
             </p>
             <p>
                 <label class="weui-form-preview-label f-green">预约时间:</label>

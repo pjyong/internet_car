@@ -32,8 +32,5 @@ require __DIR__ . '/src/routes.php';
 // 所有业务逻辑
 require __DIR__ . '/src/bussiness.php';
 
-
-require __DIR__ . '/src/mvs-php-sdk/include.php';
-
 // Run app
 $app->run();

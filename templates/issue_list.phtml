@@ -22,26 +22,27 @@
                 <?php } ?>
                     <?php if($issue['confirm_status'] == 1){ ?>
                         <span class="weui-badge success" style="position: absolute;top: -.4em;right: -.4em;">
-                        <?php echo $issue['serve_no'];?>
-                        </span>
-                    <?php } else{ ?>
-                        <span class="weui-badge" style="position: absolute;top: -.4em;right: -.4em;">
-                        待确认
+                        <?php echo formatServeNO( $issue['serve_no'] );?>
                         </span>
                     <?php } ?>
             </div>
             <div class="weui_media_bd">
                 <p class="weui_media_desc"><?php echo $issue['description'];?></p>
+
                 <ul class="weui_media_info">
-                    <?php if($issue['confirm_status'] == 1){ ?>
-                        <li class="weui_media_info_meta ">预约号:<?php echo $issue['serve_no'];?></li>
-                        <li class="weui_media_info_meta weui_media_info_meta_extra">预约时间:<?php echo getShortTime( $issue['serve_time'] );?></li>
-                    <?php }else{ ?>
-                        <li class="weui_media_info_meta">
-                            创建时间:<?php echo getShortTime( $issue['create_time'] );?>
-                        </li>
-                    <?php } ?>
+                    <li class="weui_media_info_meta">
+                        <?php echo $issue['staffInfo']['name'];?>
+                    </li>
+                    <li class="weui_media_info_meta">
+                        <?php echo $issue['staffInfo']['room'];?>
+                    </li>
+                    <li class="weui_media_info_meta weui_media_info_meta_extra">
+                        <?php echo getShortTime( $issue['create_time'] );?>
+                    </li>
                 </ul>
+                <?php if($issue['confirm_status'] == 1){ ?>
+                <div class="yu_serve_info f-green">预约:&nbsp;<?php echo getShortTime( $issue['serve_time'] );?></div>
+                <?php } ?>
             </div>
         </a>
         <?php } ?>

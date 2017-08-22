@@ -138,7 +138,6 @@ $app->get('/oauth', function ($request, $response, $args) use( $app ) {
 
 // 显示相关资料,正在审核或者开始预约
 $app->get('/profile[/id/{id}]', function ($request, $response, $args) {
-    print 123;exit;
     checkAuth( $request );
     $staffIDFromCookie = getCookie($request, 'id');
     $showActions = false;
